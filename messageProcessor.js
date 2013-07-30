@@ -55,7 +55,16 @@ function processActionData(actionString) {
 
 
 
+//recoveres dashboard data
+function showDashboardStats(req, res) {
 
-exports.startData     = processStartData;
-exports.stopData      = processStopData;
-exports.actionData    = processActionData;
+    console.log("Showing dashboard data");
+    var data = db.getDashboardData();
+    console.log(data);
+}
+
+
+exports.startData            = processStartData;
+exports.stopData             = processStopData;
+exports.actionData           = processActionData;
+exports.showDashboardStats   = showDashboardStats;
