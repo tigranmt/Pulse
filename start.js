@@ -21,12 +21,14 @@ var processRequest = function(req, callback) {
 
 var showDashboardStats = function(req, res) {
   processor.showDashboardStats(req, res);
+
 }
 
 
 app.post('/pulse/start', function(req, res){    
      console.log("Start pulse....");
      processRequest(req, processor.startData); 
+     res.send("ok");
 });
 
 

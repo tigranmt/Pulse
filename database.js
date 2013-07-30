@@ -3,6 +3,15 @@
  var client = redis.createClient();
 
 
+ var clientPreChar = "%";
+ var hardwarePreChar = "$";
+
+ /*The maximum supproted count of a hardware IDs possible store FOR SINGLE CLIENT
+   Can be changed in the future, to meet the needs of bigger systems
+ */
+ var maxHardwareIDsSupported = 10;
+
+
 
  var clientReady = false;
 
@@ -35,9 +44,11 @@ function saveStartData(startData) {
          os              : split[5], //OS name (XP, Vista, Windows7, Ubuntu....)
          processor       : split[6], //processor info
          country         : split[7], 
-         date            : split[8] //execution date
+         date            : split[8]  //execution date
     };*/
 
+    var clientComplete = clientPreChar + startData.clientCode;
+    var hardwareComplete = hardwarePreChar +  startData.hardwareID;
 
 	if(clientReady === false) {
 		console.log("Client is not ready"); 
@@ -45,7 +56,69 @@ function saveStartData(startData) {
 	}
 
     console.log("Saving start data: " + startData.hardwareID + " " + startData.clientCode);
-	client.set(startData.clientCode, startData.hardwareID, redis.print);
+    
+
+    //save hardware IDs in corriposndence with client ID
+	client.lrange(clientComplete, 0, 10, function (err, reply) {			
+			
+			
+     		var arr = null;
+
+            console.log("reply: " + reply.toString());
+
+     		if(reply !== null) 
+				arr = reply.toString(); //get all hardware IDs related to this client code 
+
+			if(arr !== "") {
+				console.log("arr value is: " + arr);
+				var split = arr.split(',');  //construct array 
+
+				//check if in the list of the available hardware IDs there is already one with the same name
+				var foundIndex = split.indexOf(hardwareComplete);  
+				if(foundIndex < 0) {
+				  	console.log("Not present any hardwareID: " + hardwareComplete);
+				   
+				    //get the length of the list of hardware IDs associated with specified client ID
+				  	client.llen(clientComplete, function (err, reply) {
+						
+						//guess correct index of the new element
+						var insertIndex = reply; 
+						// check if this NEW hardware ID  can be pushged on list and list
+						// still remains in the accepted listst dimensions
+						if(insertIndex === maxHardwareIDsSupported) {
+							insertIndex = maxHardwareIDsSupported - 1; 
+							client.lset(clientComplete, insertIndex, hardwareComplete);
+						}
+						else {
+							// dimension of the list is less maxHardwareIDsSupported, so just append this new 
+							// hardware ID to the list of client code 
+							client.lpush(clientComplete, hardwareComplete);
+						}				
+						
+						
+				  	});
+
+					
+				}
+				else {
+					
+					console.log("Found hardwareID: " + hardwareComplete);
+				}
+			}
+			else {
+
+				//there is no ANY data present for specified client ID , so just insert at 0 index
+				console.log("setting " + clientComplete + " at index 0 the value: " + hardwareComplete);
+				client.lpush(clientComplete, hardwareComplete);
+			}
+			   
+
+
+	}); 
+
+	//save hardware ID info in relation to properties of machine 
+ 	client.hmset(hardwareComplete, "client", clientComplete, "appVersion", startData.appVersion, "os", startData.os, "processor", startData.processor, "country", startData.country, redis.print );
+			
 	
 };
 
