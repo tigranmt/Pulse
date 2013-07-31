@@ -1,6 +1,25 @@
-var db = require("./database"); 
+var db = require("./database_redis"); 
 
 var splitChar = "#";
+
+
+function canPass(packet) {
+
+    /*CHANGE THIS LINE TO CHECK FOR APPLICATION SEOCIFIC KEY */
+    /***************************************************/
+    /***************************************************/
+    if(packet.crypto === packet.crypto)
+        return true; 
+    /***************************************************/
+    /***************************************************/
+
+
+
+
+    return false;
+}
+
+
 function processStartData(startString) {    
 
     
@@ -14,24 +33,34 @@ function processStartData(startString) {
          os              : split[5], //OS name (XP, Vista, Windows7, Ubuntu....)
          processor       : split[6], //processor info
          country         : split[7], 
-         date            : split[8] //execution date
+         date            : split[8], //execution date
+         hour            : split[9]  //execution hour
     };
+
+
+    if(!canPass(packet))
+        return false;
     
     db.saveStartData(packet);
 };
 
 
-function processStopData(startString) {    
+function processStopData(stopString) {    
 
-    var split   = startString.split(splitChar);
+    var split   = stopString.split(splitChar);
     var packet = {             
          crypto          : split[0], //encrypted key
          hardwareID      : split[1], //unique hardware ID
          clientCode      : split[2], //client code 
          version         : split[3], //version of the message 
          appVersion      : split[4], //application version     
-         date            : split[4], //execution date
+         date            : split[5], //execution date
+         hour            : split[6]  //execution hour
     };
+
+
+    if(!canPass(packet))
+        return false;
     
     db.saveStopData(packet);
 };
@@ -47,9 +76,14 @@ function processActionData(actionString) {
              appVersion      : split[4], //application version
              actionName      : split[5], //action name
              actionValue     : split[6], //action value            
-             date            : split[7]  //execution date
+             date            : split[7], //execution date
+             hour            : split[8]  //execution hour
         };
         
+
+        if(!canPass(packet))
+            return false;
+
         db.saveActionData(packet);
 };
 
@@ -58,8 +92,14 @@ function processActionData(actionString) {
 //recoveres dashboard data
 function showDashboardStats(req, res) {
 
+    if(!canPass(packet))
+        return false;
+
     console.log("Showing dashboard data");
     var data = db.getDashboardData();
+
+
+
     console.log(data);
 }
 
