@@ -25,7 +25,7 @@ connection.connect(function(err) {
 });
 
 
-//check if DB 'Pulse' exists, if not ctreate it and construc tables 
+//check if DB 'Pulse' exists, if not ctreate it and construct tables 
 connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '" + dbName + "'", function( error, rows) {
  
 
@@ -105,6 +105,9 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 
 												connection.query(createLogActionTable, function(err){
 														if (err) { throw err; }
+
+
+														console.log("Database " + dbName + " and its scheme creation completed succesfully");
 												});
 
 										});
@@ -124,7 +127,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 
 		});
 
-		console.log("Database " + dbName + " and its scheme creation completed succesfully");
+		
 
 		//----------------
 
@@ -149,6 +152,9 @@ function saveStartData(startData) {
          date            : split[8], //execution date
          hour           :  split[9], //execution hour
     };*/
+
+
+
 
    
 	
