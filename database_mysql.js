@@ -1,39 +1,137 @@
- var start = require("./start");
- var redis = require("mysql");
- var client = redis.createClient();
+ var start 	= require("./start");
+ 
+ var mysql 	= require("mysql");
 
 
- var clientPreChar 		= "%";
- var hardwarePreChar 	= "$";
- var startPre			= "$start_";	
- var stopPre			= "$stop_";	
- var actionPre			= "$a_";
+ var dbName = "Pulse";
+ var clientsTableName = "Clients";
+ var hardwareTableName = "Hardware";
+ var logTableName = "Log"; 
+ var logActionsTableName = "LogActions";
 
- /*The maximum supproted count of a hardware IDs possible store FOR SINGLE CLIENT
-   Can be changed in the future, to meet the needs of bigger systems
- */
- var maxHardwareIDsSupported = 10;
+var connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'tigran',
+  password : 'ararat',
+ 
+});
 
 
 
- var clientReady = false;
+connection.connect(function(err) {
+     if(err != null) {
+     	console.log("Error no connection: " + err);
+     }
+});
 
- client.on("error", function (err) {
-    console.log("Error " + err);
+
+//check if DB 'Pulse' exists, if not ctreate it and construc tables 
+connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '" + dbName + "'", function( error, rows) {
+ 
+
+     if ( error ) {
+       console.log( "Error on database presence identification: " + error );
+       return;
+     }
+ 
+      //No any database is present on server, so let's create database and tables
+     if(rows.length === 0) {
+     	console.log("No any  database '" + dbName + "' found. Start creating it: ");
+
+     	//Create Database 
+        connection.query("DROP DATABASE IF EXISTS " + dbName, function(err) {
+		  	if (err) { throw err; }
+
+		  	// create database
+			connection.query("CREATE DATABASE " + dbName, function(err) {
+			  	if (err) { throw err; }
+
+			  	console.log("Database " + dbName + " created");
+				console.log("Start creating tables");
+
+				connection.query("USE " + dbName, function(err) {
+					if (err) { throw err; }
+
+			        //Create Clients table
+					var createClientTable = "CREATE TABLE Clients (" +
+													"ClientID SMALLINT(6)," + 
+													"HardwareID VARCHAR(20)," + 
+													"RegistrationDate VARCHAR(8)," + 
+													"RegistrationHour VARCHAR(5)," + 
+													"PRIMARY KEY ( ClientID ));";
+
+
+					connection.query(createClientTable, function(err){
+							if (err) { throw err; }
+
+
+								//Create Hardware table
+								var createHardwareTable = "CREATE TABLE Hardware (	" + 
+																"HardwareID VARCHAR(20)," + 
+						    									"AppVersion VARCHAR(16)," + 
+						    									"OS         VARCHAR(20),"+ 
+						    									"Processor  VARCHAR(20)," + 
+						    									"Country    VARCHAR(20), " +  
+																"RegistrationDate VARCHAR(8), " +
+																"RegistrationHour VARCHAR(5)," + 
+																"PRIMARY KEY ( HardwareID ));";
+
+						 		connection.query(createHardwareTable, function(err){
+										if (err) { throw err; }
+
+
+										//Create Log table 
+										var createLogTable = "CREATE TABLE Log ( " + 
+																		"ClientID SMALLINT(6), " + 
+																		"HardwareID VARCHAR(20)," + 	
+																		"RegistrationDate VARCHAR(8)," +  
+																		"RegistrationHour VARCHAR(5)," + 	
+																		"PRIMARY KEY ( ClientID ));";
+
+										connection.query(createLogTable, function(err){
+												if (err) { throw err; }
+
+
+												//Create Action log table 
+												var createLogActionTable = "CREATE TABLE LogAction (" + 
+																				"ClientID SMALLINT(6)," + 
+																				"HardwareID VARCHAR(20)," + 
+																				"Action VARCHAR(20)," + 
+																				"ActionValue VARCHAR(30)," + 
+																				"RegistrationDate VARCHAR(8)," + 
+																				"RegistrationHour VARCHAR(5)," + 
+																				"PRIMARY KEY ( ClientID ));"
+												console.log("Log table SQL: " + createLogActionTable);
+
+												connection.query(createLogActionTable, function(err){
+														if (err) { throw err; }
+												});
+
+										});
+
+																				//--------------------
+								});
+								//---------------------
+					});
+					// ---------------
+
+
+				}); //USE DB
+			});
+			// -------------
+
+
+
+		});
+
+		console.log("Database " + dbName + " and its scheme creation completed succesfully");
+
+		//----------------
+
+     }//if Database does not exist
+	 
+   
  });
-
- client.on("ready", function() {
- 	clientReady = true;
- 	console.log("Client is ON");
- });
-
- client.on("end", function() {
- 	clientReady = false;
- 	console.log("Client is OFF");
- });
-
-
-
        
 //Saves stop data in database
 function saveStartData(startData) {
@@ -52,156 +150,23 @@ function saveStartData(startData) {
          hour           :  split[9], //execution hour
     };*/
 
-    var clientComplete 		=  clientPreChar + startData.clientCode;
-    var hardwareComplete 	=  hardwarePreChar +  startData.hardwareID;
-
-    var startComplete 		=  startPre + hardwareComplete;
-
-
-	if(clientReady === false) {
-		console.log("Client is not ready"); 
-		return false;
-	}
-
-    console.log("Saving start data: " + startData.hardwareID + " " + startData.clientCode);
-    
-
-    //save hardware IDs in corriposndence with client ID
-	client.lrange(clientComplete, 0, 10, function (err, reply) {			
-			
-			
-     		var arr = null;
-
-            console.log("reply: " + reply.toString());
-
-     		if(reply !== null) 
-				arr = reply.toString(); //get all hardware IDs related to this client code 
-
-			if(arr !== "") {
-				console.log("arr value is: " + arr);
-				var split = arr.split(',');  //construct array 
-
-				//check if in the list of the available hardware IDs there is already one with the same name
-				var foundIndex = split.indexOf(hardwareComplete);  
-				if(foundIndex < 0) {
-				  	console.log("Not present any hardwareID: " + hardwareComplete);
-				   
-				    //get the length of the list of hardware IDs associated with specified client ID
-				  	client.llen(clientComplete, function (err, reply) {
-						
-						//guess correct index of the new element
-						var insertIndex = reply; 
-						// check if this NEW hardware ID  can be pushged on list and list
-						// still remains in the accepted listst dimensions
-						if(insertIndex === maxHardwareIDsSupported) {
-							insertIndex = maxHardwareIDsSupported - 1; 
-							client.lset(clientComplete, insertIndex, hardwareComplete);
-						}
-						else {
-							// dimension of the list is less maxHardwareIDsSupported, so just append this new 
-							// hardware ID to the list of client code 
-							client.lpush(clientComplete, hardwareComplete);
-						}				
-						
-						
-				  	});
-
-					
-				}
-				else {
-					
-					console.log("Found hardwareID: " + hardwareComplete);
-				}
-			}
-			else {
-
-				//there is no ANY data present for specified client ID , so just insert at 0 index
-				console.log("setting " + clientComplete + " at index 0 the value: " + hardwareComplete);
-				client.lpush(clientComplete, hardwareComplete);
-			}
-			   
-
-
-	}); 
-
-	//save hardware ID info in relation to properties of machine 
- 	client.hmset(hardwareComplete, "client", clientComplete, "appVersion", startData.appVersion, "os", startData.os, "processor", startData.processor, "country", startData.country, redis.print );
- 	client.hmset(startComplete, "hardware", hardwareComplete, "client", clientComplete, "date", startData.date, "hour", startData.hour, redis.print );			
+   
 	
 };
 
 function saveStopData (stopData) {
-	if(clientReady === false) {
-		console.log("Client is not ready"); 
-		return false;
-	}
-
- 	
-	/* var packet = {             
-         crypto          : split[0], //encrypted key
-         hardwareID      : split[1], //unique hardware ID
-         clientCode      : split[2], //client code 
-         version         : split[3], //version of the message 
-         appVersion      : split[4], //application version     
-         date            : split[5], //execution date
-         hour			 : split[6]  //execution hour
-     };*/
-
- 	var clientComplete 		= clientPreChar + stopData.clientCode;
-    var hardwareComplete 	= hardwarePreChar +  stopData.hardwareID;
-    var stopComplete 		= stopPre + hardwareComplete;
-
-
-    
- 	client.hmset(stopComplete, "hardware", hardwareComplete, "client", clientComplete, "date", stopData.date, "hour", stopData.hour, redis.print );			
 	
-
 };
 
 function saveActionData (actionData) {
-	if(clientReady === false) {
-		console.log("Client is not ready"); 
-		return false;
-	}
-
- 	/*
-    var packet = {             
-             crypto          : split[0], //encrypted key
-             hardwareID      : split[1], //unique hardware ID
-             clientCode      : split[2], //client code 
-             version         : split[3], //version of the message 
-             appVersion      : split[4], //application version
-             actionName      : split[5], //action name
-             actionValue     : split[6], //action value            
-             date            : split[7], //execution date
-             hour            : split[8]  //execution hour
-        };
- 	*/
-
-	var clientComplete 		= clientPreChar + actionData.clientCode;
-    var hardwareComplete 	= hardwarePreChar +  actionData.hardwareID;
-    var actionComplete 		= actionPre + hardwareComplete;
-
 	
-	var concat = hardwareComplete + "|" + clientComplete + "|" + actionData.actionName + "|" +  actionData.actionValue + "|" + actionData.date + "|" + actionData.hour;
-
-    client.lpush(actionComplete, concat, redis.print );		
-
 
 };        
 
 
 //Get overall information about data present in base
 function getDashboardData() {
-	console.log("Getting dashborad data from DB...");
-	if(clientReady === false) {
-		console.log("Client is not ready"); 
-		return false;
-	}
-	return client.get("W -DCW2CVE464248", function (err, reply) {
-        console.log(reply.toString()); // prints "Value" to the console
-       // console.log(err.toString());   // prints error
-    });
+	
 }
 
 

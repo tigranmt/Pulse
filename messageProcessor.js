@@ -1,4 +1,5 @@
-var db = require("./database_redis"); 
+//var db = require("./database_redis"); 
+var db = require("./database_mysql"); 
 
 var splitChar = "#";
 
