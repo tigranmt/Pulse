@@ -3,7 +3,7 @@ var express = require("express");
 var app= express();                                 //create express object
 
 
-var port = 3000;
+var port = process.env.PORT || 3000;
 
 /*app.use(express.cookieParser());
 app.use(express.session({secret: '1234567890QWERTY'}));*/
