@@ -9,7 +9,7 @@ function canPass(packet) {
     /*CHANGE THIS LINE TO CHECK FOR APPLICATION SPECIFIC KEY */
     /***************************************************/
     /***************************************************/
-    if(packet.crypto === packet.crypto)
+    if("125D3F3F-17FB-4CF6-B7D3-DEF29E4F9E8E" === packet.crypto)
         return true; 
     /***************************************************/
     /***************************************************/
@@ -39,8 +39,12 @@ function processStartData(startString) {
     };
 
 
-    if(!canPass(packet))
+    if(!canPass(packet)) {
+        
+        throw "Non valid app key";
         return false;
+
+    }
     
     db.saveStartData(packet);
 };
