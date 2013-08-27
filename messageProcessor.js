@@ -6,7 +6,7 @@ var splitChar = "#";
 
 function canPass(packet) {
 
-    /*CHANGE THIS LINE TO CHECK FOR APPLICATION SEOCIFIC KEY */
+    /*CHANGE THIS LINE TO CHECK FOR APPLICATION SPECIFIC KEY */
     /***************************************************/
     /***************************************************/
     if(packet.crypto === packet.crypto)
