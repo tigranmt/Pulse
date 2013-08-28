@@ -1,5 +1,4 @@
- var start 	= require("./start");
- 
+ var start 	= require("./start"); 
  var mysql 	= require("mysql");
 
 
@@ -24,6 +23,7 @@ connection.connect(function(err) {
      }
     
 });
+
 
 
 //check if DB 'Pulse' exists, if not ctreate it and construct tables 

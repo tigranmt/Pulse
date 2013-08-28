@@ -1,4 +1,4 @@
-var processor = require("./messageProcessor");      //create Processor
+var pulseProcessor = require("./pulseProcessor");      //create Processor
 var express = require("express");
 var app= express();                                 //create express object
 
@@ -21,26 +21,25 @@ var processRequest = function(req, res, callback) {
 };
 
 var showDashboardStats = function(req, res) {
-  processor.showDashboardStats(req, res);
-
+  pulseProcessor.showDashboardStats(req, res);
 }
 
 
 app.post('/pulse/start', function(req, res){    
      console.log("Start pulse....");
-     processRequest(req, res, processor.startData); 
+     processRequest(req, res, pulseProcessor.startData); 
      res.send("ok");
 });
 
 
 app.post('/pulse/stop', function(req, res){    
     console.log("Stop pulse....");
-    processRequest(req, res, processor.stopData);  
+    processRequest(req, res, pulseProcessor.stopData);  
 });
 
 
 app.post('/pulse/action', function(req, res){    
-    processRequest(req, res, processor.actionData);  
+    processRequest(req, res, pulseProcessor.actionData);  
 });
 
 
