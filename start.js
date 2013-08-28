@@ -1,14 +1,21 @@
-var pulseProcessor = require("./pulseProcessor");      //create Processor
-var express = require("express");
-var app= express();                                 //create express object
+var pulseProcessor = require("./requestProcessors/pulseProcessor");      //create pusle Processor
+var webProcessor   = require("./requestProcessors/webProcessor");          //create web Processor
+var express        = require("express");
+
+
+var app= express();                                
 
 
 var port = process.env.PORT || 3000;
 
-/*app.use(express.cookieParser());
-app.use(express.session({secret: '1234567890QWERTY'}));*/
 
-var processRequest = function(req, res, callback) {
+// Log the requests
+app.use(express.logger('dev'));
+
+
+
+/*** PULSE requests handlers *****/ 
+var processPulseRequest = function(req, res, callback) {
     var data = "";
     req.on('data', function(chunk) {     
       data += chunk.toString();
@@ -20,39 +27,42 @@ var processRequest = function(req, res, callback) {
     });
 };
 
-var showDashboardStats = function(req, res) {
-  pulseProcessor.showDashboardStats(req, res);
-}
-
-
 app.post('/pulse/start', function(req, res){    
      console.log("Start pulse....");
-     processRequest(req, res, pulseProcessor.startData); 
+     processPulseRequest(req, res, pulseProcessor.startData); 
      res.send("ok");
 });
 
 
 app.post('/pulse/stop', function(req, res){    
     console.log("Stop pulse....");
-    processRequest(req, res, pulseProcessor.stopData);  
+    processPulseRequest(req, res, pulseProcessor.stopData);  
 });
 
 
 app.post('/pulse/action', function(req, res){    
-    processRequest(req, res, pulseProcessor.actionData);  
+    processPulseRequest(req, res, pulseProcessor.actionData);  
+});
+/********************************/
+
+
+/** WEB requests handlers ****/ 
+
+app.get('/welcomepulse', function(req, res){     
+   console.log("WELCOME PULSE");
+   webProcessor.welcome(req,res);  
+});
+
+app.get('*', function(req, res) {    
+  webProcessor.process(req, res);
 });
 
 
-app.get('/stats/dashboard', function(req, res) {
-  console.log("Getting dashboard data...");
-  showDashboardStats(req, res);
-});
+/********************************/
 
 
-
-app.use(function(err, req, res, next){
-  console.error(err.stack);
- 
+app.use(function(err, req, res, next){  
+  console.error(err.stack); 
 });
 
 console.log("Start listening on port " + port);
