@@ -7,6 +7,7 @@
  var hardwareTableName = "Hardware";
  var logTableName = "Log"; 
  var logActionsTableName = "Logaction";
+ var actionsTableName = "Actions";
 
 var connection = mysql.createConnection({
   host     : 'localhost',
@@ -14,6 +15,7 @@ var connection = mysql.createConnection({
   password : '',
  
 });
+
 
 
 
@@ -25,8 +27,11 @@ connection.connect(function(err) {
 });
 
 
-
-//check if DB 'Pulse' exists, if not ctreate it and construct tables 
+ //**********************************************************************************************************************************
+ //**********************************************************************************************************************************
+ // CHECK IF DATABASE EXISTS, IF NOT, CREATE IT
+ //**********************************************************************************************************************************
+ //**********************************************************************************************************************************
 connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '" + dbName + "'", function( error, rows) {
  
 
@@ -99,20 +104,37 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 												var createLogActionTable = "CREATE TABLE LogAction (" + 
 																				"ClientID SMALLINT(6)," + 
 																				"HardwareID VARCHAR(20)," + 
-																				"Action VARCHAR(30)," + 
+																				"Action MEDIUMINT," + 
 																				"ActionValue VARCHAR(30)," + 
 																				"RegistrationDate VARCHAR(10)," + 
 																				"RegistrationHour VARCHAR(5)," + 
 																				"ID MEDIUMINT NOT NULL AUTO_INCREMENT," +      								
      																			"PRIMARY KEY (ID))"; 
 
-												console.log("Log table SQL: " + createLogActionTable);
+												console.log("ActionLog table SQL: " + createLogActionTable);
 
 												connection.query(createLogActionTable, function(err){
 														if (err) { throw err; }
 
+														var createActionsTable = "CREATE TABLE Actions ( " + 	
+																					"Action VARCHAR(30), " + 
+																					"Description VARCHAR(30), " + 
+																					"ID MEDIUMINT NOT NULL AUTO_INCREMENT, " + 
+    																				"PRIMARY KEY (ID)" +     																				
+ 																					")";
 
-														console.log("Database " + dbName + " and its scheme creation completed succesfully");
+														console.log("Actions table SQL: " + createActionsTable);
+
+														connection.query(createActionsTable, function(err){
+																if (err) { throw err; }
+														
+																console.log("Database " + dbName + " and its scheme creation completed succesfully");
+
+
+														});
+
+
+														
 												});
 
 										});
@@ -143,6 +165,8 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 	 
    
  });
+ //**********************************************************************************************************************************
+ //**********************************************************************************************************************************
 
 
  function handleerror(error) {
@@ -359,7 +383,7 @@ function clientsTableCheck(startData, next, error) {
 
 		     	var registrationDateEscaped = connection.escape(startData.date);
 		     	var registrationHourEscaped = connection.escape(startData.hour);
-		     	console.log("No data found in " + clientsTableName + " taable. Start inserting data.");
+		     	console.log("No data found in " + clientsTableName + " table. Start inserting data.");
 
 
 		     	var queryInsert = "INSERT INTO " + clientsTableName + " (HardwareID, ClientID, RegistrationDate, RegistrationHour) VALUES("  + hardwareIDEscaped + "," + clientIDEscaped + 
@@ -427,19 +451,81 @@ function saveActionData (actionData) {
 	var registrationHourEscaped = connection.escape(actionData.hour);
  	
 
- 	var insertQuery = "INSERT INTO " + logActionsTableName + " (ClientID, HardwareID, Action, ActionValue, RegistrationDate, RegistrationHour) VALUES(" + 
- 										clientIDEscaped + "," + hardwareIDEscaped + "," + actionNameEscaped + "," + actionValueEscaped + "," + registrationDateEscaped + "," + registrationHourEscaped + ")";
-
- 	connection.query(insertQuery, function(er, rows) {
- 		if(er) {
- 			console.log( "Error on " +  logActionsTableName + " table query: " + er);
- 			throw er;		    
- 		}
- 	});
+	//first check if specified SAction is present in DB 
 
 
+    var selectActionsQuery =  "SELECT ID FROM " +  actionsTableName + " WHERE ACTION=" + actionNameEscaped;
+    connection.query(selectActionsQuery, function(er, rows) {
 
-};        
+
+    	if(!rows || rows.length === 0) {
+
+         
+
+    		//not any record for specified action present, so first we have to register it
+    		console.log("Action " + actionNameEscaped + " wasn'r found. Start insert into " + actionsTableName);
+    		var insertAction = "INSERT INTO "  + actionsTableName + "(Action,Description) VALUES(" + actionNameEscaped + ", '')";
+    		console.log(insertAction);
+
+    		connection.query(insertAction, function(er, rows) {
+    				if(er) {
+		 				console.log( "Error on " +  actionsTableName + " table query: " + er);
+		 				throw er;		    
+		 			}
+
+		 			//Select again to retrive assigned ID 
+ 					connection.query(selectActionsQuery, function(er, rows) {
+ 						if(er) throw er;
+
+ 						//insert into log actions with specified action ID
+ 						var id = rows[0].ID;
+ 						console.log("rows"); 
+ 						console.log(rows);
+
+
+ 						var insertQuery = "INSERT INTO " + logActionsTableName + " (ClientID, HardwareID, Action, ActionValue, RegistrationDate, RegistrationHour) VALUES(" + 
+	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + actionValueEscaped + "," + registrationDateEscaped + "," + registrationHourEscaped + ")";
+
+
+ 						console.log(insertQuery);
+
+					 	connection.query(insertQuery, function(er, rows) {
+					 		if(er) {
+					 			console.log( "Error on " +  logActionsTableName + " table query: " + er);
+					 			throw er;		    
+					 		}
+					 	});
+					 	// ---- 
+
+ 					});
+
+
+    		});
+
+			
+    	}
+    	else {
+
+			//insert into log actions with specified action ID
+    		var id = rows[0].ID;
+	    	var insertQuery = "INSERT INTO " + logActionsTableName + " (ClientID, HardwareID, Action, ActionValue, RegistrationDate, RegistrationHour) VALUES(" + 
+	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + actionValueEscaped + "," + registrationDateEscaped + "," + registrationHourEscaped + ")";
+
+		 	connection.query(insertQuery, function(er, rows) {
+		 		if(er) {
+		 			console.log( "Error on " +  logActionsTableName + " table query: " + er);
+		 			throw er;		    
+		 		}
+		 	});
+		 	// ------------
+		}
+
+    });
+
+}; 
+
+
+
 
 
 //Get overall information about data present in base
