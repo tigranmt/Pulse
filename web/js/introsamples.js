@@ -6,12 +6,37 @@
 	barChartSample();
 
 
+
+	$(window).bind('resize', function(e)
+	{
+	    window.resizeEvt;
+	    $(window).resize(function()
+	    {
+	        clearTimeout(window.resizeEvt);
+	        window.resizeEvt = setTimeout(function()
+	        {
+	        	//resize finished
+	            $("#lineChartSample").empty();
+		 		lineChartSample();
+
+		 		$("#donutChartSample").empty();
+		 		donutChartSample();
+
+				$("#barChartSample").empty();
+				barChartSample();
+
+	        }, 250);
+	    });
+	});
+
+	
+
 	function lineChartSample() {
 
 
 		new Morris.Line({
 		  // ID of the element in which to draw the chart.
-		  element: 'lineCharSample',
+		  element: 'lineChartSample',
 		  // Chart data records -- each entry in this array corresponds to a point on
 		  // the chart.
 		  data: [
@@ -43,7 +68,7 @@
 
 		new Morris.Donut({
 		  // ID of the element in which to draw the chart.
-		  element: 'donutCharSample',
+		  element: 'donutChartSample',
 		  // Chart data records -- each entry in this array corresponds to a point on
 		  // the chart.
 		  data: [
@@ -63,7 +88,7 @@
 
 		new Morris.Bar({
 		  // ID of the element in which to draw the chart.
-		  element: 'barCharSample',
+		  element: 'barChartSample',
 		  // Chart data records -- each entry in this array corresponds to a point on
 		  // the chart.
 		  // the chart.

@@ -32,60 +32,29 @@
 </head>
 
 <body>
-<div class="container-fluid" id="introheader">
-	<div class="row-fluid">
-		<div class="span12">
-			<div class="hero-unit well">
-				<h1>
-					Pulse
-				</h1>
-				<p>
-					Application statistics made easy.
-				</p>
-				<p>
-					<button id="goto" class="btn btn-large btn-info"> Go >></button>
-				</p>
-			
-			
-			</div>
-		</div>
+
+	<div id="navigation" class="list-group">
+	     
+	  <a id="dashboardpage" href="dashboard" class="list-group-item">
+	  	<span class="glyphicon glyphicon-th-large"/> Dashboard
+	  </a>
+
+	  <a id="usersstatpage" href="userstat" class="list-group-item active">
+	  	<span class="glyphicon glyphicon-user"/> Users stat
+	  </a>
+
+	  
+	  <a id="errorspage" href="errors" class="list-group-item">
+	  	<span class="glyphicon glyphicon-exclamation-sign"/> Errors
+	  </a>
+
+	 
+	  <a id="actionspage" href="actions" class="list-group-item">
+	  	 <span class="glyphicon glyphicon-random"/> Actions
+	  </a>	  
+
 	</div>
-	<div class="row-fluid">
-		<div class="span4">
-			<h2>
-				Follow your program progress
-			</h2>
-			<p>
-				<div id="lineChartSample" >
-					
-				</div>
-			</p>
-			
-		</div>
-		<div class="span4">
-			<h2>
-				See where your app running
-			</h2>
-			<p>
-				<div id="donutChartSample" >
-					
-				</div>
-			</p>
-			
-		</div>
-		<div class="span4">
-			<h2>
-				Analyze bahavior of your users
-			</h2>
-			<p>
-				<div id="barChartSample" >
-					
-				</div>
-			</p>
-			
-		</div>
-	</div>
-</div>
+
 </body>
 
 
@@ -93,6 +62,5 @@
 <script type="text/javascript" src="web/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="web/js/raphael-2.1.0.min.js"></script>
 <script type="text/javascript" src="web/js/morris.min.js"></script>
-<script type="text/javascript" src="web/js/introsamples.js"></script>
-<script type="text/javascript" src="web/js/intro.js"></script>
+<script type="text/javascript" src="web/js/dashboard.js"></script>
 </html>

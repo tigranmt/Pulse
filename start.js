@@ -53,6 +53,27 @@ app.get('/welcomepulse', function(req, res){
    webProcessor.welcome(req,res);  
 });
 
+app.get('/dashboard', function(req, res){     
+   console.log("DASHBOARD");
+   webProcessor.dashboard(req,res);  
+});
+
+
+app.get('/userstat', function(req, res){     
+   console.log("USERSTAT");
+   webProcessor.userstat(req,res);  
+});
+
+app.get('/errors', function(req, res){     
+   console.log("ERRORS");
+   webProcessor.errors(req,res);  
+});
+
+app.get('/actions', function(req, res){     
+   console.log("ACTIONS");
+   webProcessor.actions(req,res);  
+});
+
 app.get('*', function(req, res) {    
   webProcessor.process(req, res);
 });
