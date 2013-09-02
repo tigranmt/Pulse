@@ -1,12 +1,12 @@
-var pulseProcessor = require("./requestProcessors/pulseProcessor");      //create pusle Processor
-var webProcessor   = require("./requestProcessors/webProcessor");          //create web Processor
+var pulseProcessor = require("./requestProcessors/pulseProcessor");      //create pulse Processor
+var webProcessor   = require("./requestProcessors/webProcessor");        //create web Processor
 var express        = require("express");
 
 
 var app= express();                                
 
 
-var port = process.env.PORT || 3000;
+var port = process.env.VCAP_APP_PORT || 3000;
 
 
 // Log the requests
