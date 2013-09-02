@@ -10,13 +10,32 @@
  var actionsTableName = "Actions";
  var logErrorsTableName = "Logerror";
  var errorsTableName = "Errors";
+ var connection = undefined;
 
-var connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : '',
+ var serverServices = process.env.VCAP_SERVICES;
+ if(serverServices) {
+ 	var mysqlInfo = serverServices['mysql 5.1'][0]; //only one instance
+ 	var credentials = mysqlInfo.credentials;
+ 	//remote connection
+ 	connection = mysql.createConnection({
+ 		host     :  credentials.hostname,
+  		user     :  credentials.user,
+  		password :  credentials.password,
+  		port     :  credentials.port 
+	});
+
+ }
+ else {
+ 	//local connection
+ 	connection = mysql.createConnection({
+ 		host     : 'localhost',
+  		user     : 'root',
+  		password : ''
  
-});
+	});
+ }
+
+
 
 
 
@@ -108,6 +127,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 																				"HardwareID VARCHAR(20)," + 
 																				"Action MEDIUMINT," + 
 																				"ActionValue VARCHAR(30)," + 
+																				"AppVersion VARCHAR(16)," +
 																				"RegistrationDate VARCHAR(10)," + 
 																				"RegistrationHour VARCHAR(5)," + 
 																				"ID MEDIUMINT NOT NULL AUTO_INCREMENT," +      								
@@ -137,6 +157,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 																				"HardwareID VARCHAR(20)," + 
 																				"Error MEDIUMINT," + 
 																				"ErrorValue VARCHAR(30)," + 
+																				"AppVersion VARCHAR(16)," + 
 																				"RegistrationDate VARCHAR(10)," + 
 																				"RegistrationHour VARCHAR(5)," + 
 																				"ID MEDIUMINT NOT NULL AUTO_INCREMENT," +      								
@@ -455,6 +476,7 @@ function  saveErrorData(errorData) {
  	var clientIDEscaped 		= connection.escape(errorData.clientCode);  
  	var errorNameEscaped 		= connection.escape(errorData.errorName);  
  	var errorValueEscaped 		= connection.escape(errorData.errorValue);  
+ 	var appVersionEscaped 		= connection.escape(errorData.appVersion);  
  	var registrationDateEscaped = connection.escape(errorData.date);
 	var registrationHourEscaped = connection.escape(errorData.hour);
  	
@@ -491,8 +513,9 @@ function  saveErrorData(errorData) {
  						console.log(rows);
 
 
- 						var insertQuery = "INSERT INTO " + logErrorsTableName + " (ClientID, HardwareID, Error, ErrorValue, RegistrationDate, RegistrationHour) VALUES(" + 
-	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + errorValueEscaped + "," + registrationDateEscaped + "," + registrationHourEscaped + ")";
+ 						var insertQuery = "INSERT INTO " + logErrorsTableName + " (ClientID, HardwareID, Error, ErrorValue, AppVersion, RegistrationDate, RegistrationHour) VALUES(" + 
+	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + errorValueEscaped + "," + appVersionEscaped
+	 											 + "," + registrationDateEscaped + "," + registrationHourEscaped + ")";
 
 
  						console.log(insertQuery);
@@ -560,6 +583,7 @@ function saveActionData (actionData) {
  	var clientIDEscaped 		= connection.escape(actionData.clientCode);  
  	var actionNameEscaped 		= connection.escape(actionData.actionName);  
  	var actionValueEscaped 		= connection.escape(actionData.actionValue);  
+ 	var appVersionEscaped 		= connection.escape(actionData.appVersion); 
  	var registrationDateEscaped = connection.escape(actionData.date);
 	var registrationHourEscaped = connection.escape(actionData.hour);
  	
@@ -596,8 +620,9 @@ function saveActionData (actionData) {
  						console.log(rows);
 
 
- 						var insertQuery = "INSERT INTO " + logActionsTableName + " (ClientID, HardwareID, Action, ActionValue, RegistrationDate, RegistrationHour) VALUES(" + 
-	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + actionValueEscaped + "," + registrationDateEscaped + "," + registrationHourEscaped + ")";
+ 						var insertQuery = "INSERT INTO " + logActionsTableName + " (ClientID, HardwareID, Action, ActionValue, AppVersion, RegistrationDate, RegistrationHour) VALUES(" + 
+	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + actionValueEscaped + "," + appVersionEscaped  
+	 												+  "," + registrationDateEscaped + "," + registrationHourEscaped + ")";
 
 
  						console.log(insertQuery);
