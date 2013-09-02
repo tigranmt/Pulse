@@ -8,6 +8,8 @@
  var logTableName = "Log"; 
  var logActionsTableName = "Logaction";
  var actionsTableName = "Actions";
+ var logErrorsTableName = "Logerror";
+ var errorsTableName = "Errors";
 
 var connection = mysql.createConnection({
   host     : 'localhost',
@@ -59,7 +61,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 					if (err) { throw err; }
 
 			        //Create Clients table
-					var createClientTable = "CREATE TABLE Clients (" +
+					var createClientTable = "CREATE TABLE " +  clientsTableName + " (" +
 													"ClientID SMALLINT(6)," + 
 													"HardwareID VARCHAR(20)," + 
 													"RegistrationDate VARCHAR(10)," + 
@@ -72,7 +74,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 
 
 								//Create Hardware table
-								var createHardwareTable = "CREATE TABLE Hardware (	" + 
+								var createHardwareTable = "CREATE TABLE " + hardwareTableName + " (	" + 
 																"HardwareID VARCHAR(20)," + 
 						    									"AppVersion VARCHAR(16)," + 
 						    									"OS         VARCHAR(50),"+ 
@@ -87,7 +89,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 
 
 										//Create Log table 
-										var createLogTable = "CREATE TABLE Log ( " + 
+										var createLogTable = "CREATE TABLE " + logTableName +" ( " + 
 																		"ClientID SMALLINT(6), " + 
 																		"HardwareID VARCHAR(20)," + 
 																		"Opened BIT," + 	
@@ -101,7 +103,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 
 
 												//Create Action log table 
-												var createLogActionTable = "CREATE TABLE LogAction (" + 
+												var createLogActionTable = "CREATE TABLE "  + logActionsTableName + " (" + 
 																				"ClientID SMALLINT(6)," + 
 																				"HardwareID VARCHAR(20)," + 
 																				"Action MEDIUMINT," + 
@@ -116,20 +118,46 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 												connection.query(createLogActionTable, function(err){
 														if (err) { throw err; }
 
-														var createActionsTable = "CREATE TABLE Actions ( " + 	
+														var createActionsTable = "CREATE TABLE " + actionsTableName + " ( " + 	
 																					"Action VARCHAR(30), " + 
 																					"Description VARCHAR(30), " + 
 																					"ID MEDIUMINT NOT NULL AUTO_INCREMENT, " + 
-    																				"PRIMARY KEY (ID)" +     																				
- 																					")";
+    																				"PRIMARY KEY (ID))";
 
 														console.log("Actions table SQL: " + createActionsTable);
 
 														connection.query(createActionsTable, function(err){
+																
 																if (err) { throw err; }
 														
-																console.log("Database " + dbName + " and its scheme creation completed succesfully");
 
+																//create ErrorLog table 
+																var createLogErrorTable = "CREATE TABLE " + logErrorsTableName + " (" + 
+																				"ClientID SMALLINT(6)," + 
+																				"HardwareID VARCHAR(20)," + 
+																				"Error MEDIUMINT," + 
+																				"ErrorValue VARCHAR(30)," + 
+																				"RegistrationDate VARCHAR(10)," + 
+																				"RegistrationHour VARCHAR(5)," + 
+																				"ID MEDIUMINT NOT NULL AUTO_INCREMENT," +      								
+     																			"PRIMARY KEY (ID))"; 
+																connection.query(createLogErrorTable, function(err){
+
+																	if (err) { throw err; }
+
+																	var createErrorTable = "CREATE TABLE "  + errorsTableName + " ( " + 	
+																					"Error VARCHAR(30), " + 
+																					"Description VARCHAR(30), " + 
+																					"ID MEDIUMINT NOT NULL AUTO_INCREMENT, " + 
+    																				"PRIMARY KEY (ID))";
+
+																	connection.query(createErrorTable, function(err){
+
+																		if (err) { throw err; }
+
+																		console.log("Database " + dbName + " and its scheme creation completed succesfully");
+																	});	
+																});
 
 														});
 
@@ -208,7 +236,8 @@ function saveStartData(startData) {
 
 
 function insertLog(startData, opened, error) {
-	 /*var startData = {             
+	
+	/*var startData = {             
          crypto          : split[0], //encrypted key
          hardwareID      : split[1], //unique hardware ID
          clientCode      : split[2], //client code 
@@ -248,7 +277,6 @@ function insertLog(startData, opened, error) {
  			return; 
  		}
  	});
-
 
 }
 
@@ -419,6 +447,91 @@ function saveStopData (stopData) {
 	
 };
 
+
+function  saveErrorData(errorData) {
+
+
+ 	var hardwareIDEscaped 		= connection.escape(errorData.hardwareID); 
+ 	var clientIDEscaped 		= connection.escape(errorData.clientCode);  
+ 	var errorNameEscaped 		= connection.escape(errorData.errorName);  
+ 	var errorValueEscaped 		= connection.escape(errorData.errorValue);  
+ 	var registrationDateEscaped = connection.escape(errorData.date);
+	var registrationHourEscaped = connection.escape(errorData.hour);
+ 	
+
+	//first check if specified SAction is present in DB 
+
+
+    var selectErrorQuery =  "SELECT ID FROM " +  errorsTableName + " WHERE ERROR=" + errorNameEscaped;
+    connection.query(selectErrorQuery, function(er, rows) {
+
+
+    	if(!rows || rows.length === 0) {
+
+         
+
+    		//not any record for specified action present, so first we have to register it
+    		console.log("Error " + errorNameEscaped + " wasn't found. Start insert into " + errorsTableName);
+    		var insertError = "INSERT INTO "  + errorsTableName + "(Error,Description) VALUES(" + errorNameEscaped + ", '')";
+    		console.log(insertError);
+
+    		connection.query(insertError, function(er, rows) {
+    				if(er) {
+		 				console.log( "Error on " +  errorsTableName + " table query: " + er);
+		 				throw er;		    
+		 			}
+
+		 			//Select again to retrive assigned ID 
+ 					connection.query(selectErrorQuery, function(er, rows) {
+ 						if(er) throw er;
+
+ 						//insert into log errors with specified action ID
+ 						var id = rows[0].ID;
+ 						console.log("rows"); 
+ 						console.log(rows);
+
+
+ 						var insertQuery = "INSERT INTO " + logErrorsTableName + " (ClientID, HardwareID, Error, ErrorValue, RegistrationDate, RegistrationHour) VALUES(" + 
+	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + errorValueEscaped + "," + registrationDateEscaped + "," + registrationHourEscaped + ")";
+
+
+ 						console.log(insertQuery);
+
+					 	connection.query(insertQuery, function(er, rows) {
+					 		if(er) {
+					 			console.log( "Error on " +  logErrorsTableName + " table query: " + er);
+					 			throw er;		    
+					 		}
+					 	});
+					 	// ---- 
+
+ 					});
+
+
+    		});
+
+			
+    	}
+    	else {
+
+			//insert into log errors with specified action ID
+    		var id = rows[0].ID;
+	    	var insertQuery = "INSERT INTO " + logErrorsTableName + " (ClientID, HardwareID, Error, ErrorValue, RegistrationDate, RegistrationHour) VALUES(" + 
+	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + errorValueEscaped + "," + registrationDateEscaped + "," + registrationHourEscaped + ")";
+
+		 	connection.query(insertQuery, function(er, rows) {
+		 		if(er) {
+		 			console.log( "Error on " +  logErrorsTableName + " table query: " + er);
+		 			throw er;		    
+		 		}
+		 	});
+		 	// ------------
+		}
+
+    });
+
+}
+
 function saveActionData (actionData) {
 	
 	 /*
@@ -463,7 +576,7 @@ function saveActionData (actionData) {
          
 
     		//not any record for specified action present, so first we have to register it
-    		console.log("Action " + actionNameEscaped + " wasn'r found. Start insert into " + actionsTableName);
+    		console.log("Action " + actionNameEscaped + " wasn't found. Start insert into " + actionsTableName);
     		var insertAction = "INSERT INTO "  + actionsTableName + "(Action,Description) VALUES(" + actionNameEscaped + ", '')";
     		console.log(insertAction);
 
@@ -538,5 +651,6 @@ function getDashboardData() {
 exports.saveStartData    = saveStartData;
 exports.saveStopData     = saveStopData;
 exports.saveActionData   = saveActionData;
+exports.saveErrorData	 = saveErrorData;
 exports.getDashboardData = getDashboardData;
 

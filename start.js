@@ -43,6 +43,10 @@ app.post('/pulse/stop', function(req, res){
 app.post('/pulse/action', function(req, res){    
     processPulseRequest(req, res, pulseProcessor.actionData);  
 });
+
+app.post('/pulse/error', function(req, res){    
+    processPulseRequest(req, res, pulseProcessor.errorData);  
+});
 /********************************/
 
 

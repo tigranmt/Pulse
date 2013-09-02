@@ -94,7 +94,31 @@ function processActionData(actionString) {
 
 
 
+function processErrorData(actionString) {
+    var split   = actionString.split(splitChar);
+       var packet = {             
+             crypto          : split[0], //encrypted key
+             hardwareID      : split[1], //unique hardware ID
+             clientCode      : split[2], //client code 
+             version         : split[3], //version of the message 
+             appVersion      : split[4], //application version
+             errorName      : split[5],  //error name
+             errorValue     : split[6],  //error value            
+             date            : split[7], //execution date
+             hour            : split[8]  //execution hour
+        };
+        
+
+        if(!canPass(packet))
+            return false;
+
+        db.saveErrorData(packet);
+};
+
+
+
 exports.startData            = processStartData;
 exports.stopData             = processStopData;
 exports.actionData           = processActionData;
+exports.errorData            = processErrorData;
 

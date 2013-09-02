@@ -51,4 +51,21 @@ CREATE TABLE Actions (
     PRIMARY KEY (Action)
  );
 
+ CREATE TABLE LogError ( 
+	ClientID SMALLINT(6),
+	HardwareID VARCHAR(20),
+	Error MEDIUMINT,
+	ErrorValue VARCHAR(30),
+	RegistrationDate VARCHAR(10),
+	RegistrationHour VARCHAR(5),
+	ID MEDIUMINT NOT NULL AUTO_INCREMENT,
+    PRIMARY KEY (ID));
+
+CREATE TABLE Errors ( 	
+	Error VARCHAR(30), 
+	Description VARCHAR(30), 	
+	ID MEDIUMINT NOT NULL AUTO_INCREMENT,      								
+    PRIMARY KEY (ID)
+ );
+
 
