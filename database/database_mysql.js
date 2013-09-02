@@ -1,4 +1,4 @@
- var start 	= require("../start"); 
+ var start 	= require("../server"); 
  var mysql 	= require("mysql");
 
 
