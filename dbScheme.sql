@@ -6,7 +6,8 @@ CREATE TABLE Clients (
 	HardwareID VARCHAR(20), 
 	RegistrationDate VARCHAR(10), 
 	RegistrationHour VARCHAR(5), 
-	PRIMARY KEY ( ClientID )
+	ID MEDIUMINT NOT NULL AUTO_INCREMENT,
+	PRIMARY KEY (ID)
 );
 
 
@@ -18,7 +19,8 @@ CREATE TABLE Hardware (
 	Country    VARCHAR(50),  
 	RegistrationDate VARCHAR(10),
 	RegistrationHour VARCHAR(5), 
-	PRIMARY KEY ( HardwareID )
+	ID MEDIUMINT NOT NULL AUTO_INCREMENT,
+	PRIMARY KEY (ID)
 );
 
 CREATE TABLE Log ( 

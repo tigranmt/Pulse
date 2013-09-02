@@ -1,4 +1,3 @@
- var start 	= require("../server"); 
  var mysql 	= require("mysql");
 
 
@@ -85,7 +84,8 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 													"HardwareID VARCHAR(20)," + 
 													"RegistrationDate VARCHAR(10)," + 
 													"RegistrationHour VARCHAR(5)," + 
-													"PRIMARY KEY ( ClientID ));";
+													"ID MEDIUMINT NOT NULL AUTO_INCREMENT," + 
+												    "PRIMARY KEY (ID));";
 
 
 					connection.query(createClientTable, function(err){
@@ -101,7 +101,8 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 						    									"Country    VARCHAR(50), " +  
 																"RegistrationDate VARCHAR(10), " +
 																"RegistrationHour VARCHAR(5)," + 
-																"PRIMARY KEY ( HardwareID ));";
+																"ID MEDIUMINT NOT NULL AUTO_INCREMENT," + 
+																"PRIMARY KEY (ID));";
 
 						 		connection.query(createHardwareTable, function(err){
 										if (err) { throw err; }
