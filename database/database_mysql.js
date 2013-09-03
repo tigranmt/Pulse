@@ -11,21 +11,21 @@
  var errorsTableName = "Errors";
  var connection = undefined;
 
-var remote = true,
+ var remoteConfig = process.env.VCAP_SERVICES;
 
+if(remoteConfig) {
 
+   console.log("Found remote configuration"); 
 
-return; 
+   var credentials = JSON.parse(remoteConfig)[0].credentials,
 
-if(remote) {
-
-
+   console.log(credentials);
+   
 	//remote connection
 	connection = mysql.createConnection({
-		host     :  'mysql://$OPENSHIFT_MYSQL_DB_HOST:$OPENSHIFT_MYSQL_DB_PORT/',
-		user     :  'adminSJAsrB5',
-		password :  '8_kdJ-tNyGe-',		
-		database :  'pulse'
+		host     :  credentials.hostname,
+		user     :  credentials.user,
+		password :  credentials.password,				
 	});
 
  }
