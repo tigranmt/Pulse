@@ -1,0 +1,7 @@
+Root User: adminSJAsrB5
+Root Password: 8_kdJ-tNyGe-
+Database Name: pulse
+Connection URL: mysql://$OPENSHIFT_MYSQL_DB_HOST:$OPENSHIFT_MYSQL_DB_PORT/
+You can manage your new MySQL database by also embedding phpmyadmin-3.
+The phpmyadmin username and password will be the same as the MySQL credentials
+above.

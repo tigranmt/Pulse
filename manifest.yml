@@ -1,0 +1,17 @@
+---
+applications:
+  .:
+    name: apppulse
+    framework:
+      name: node
+      info:
+        mem: 64M
+        description: Node.js Application
+        exec: 
+    infra: eu-aws
+    url: appPulse.eu01.aws.af.cm
+    mem: 64M
+    instances: 2
+    services:
+      apppulse_mysql:
+        type: mysql
