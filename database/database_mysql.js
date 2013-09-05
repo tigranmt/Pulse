@@ -622,13 +622,13 @@ function saveActionData (actionData) {
 		 			}
 
 		 			//Select again to retrive assigned ID 
- 					connection.query(selectActionsQuery, function(er, rows) {
+ 					connection.query(selectActionsQuery, function(er, selectedRows) {
  						if(er) throw er;
 
  						//insert into log actions with specified action ID
- 						var id = rows[0].ID;
+ 						var id = selectedRows[0].ID;
  						console.log("rows"); 
- 						console.log(rows);
+ 						console.log(selectedRows);
 
 
  						var insertQuery = "INSERT INTO " + logActionsTableName + " (ClientID, HardwareID, Action, ActionValue, AppVersion, RegistrationDate, RegistrationHour) VALUES(" + 
@@ -638,7 +638,7 @@ function saveActionData (actionData) {
 
  						console.log(insertQuery);
 
-					 	connection.query(insertQuery, function(er, rows) {
+					 	connection.query(insertQuery, function(er, insertRows) {
 					 		if(er) {
 					 			console.log( "Error on " +  logActionsTableName + " table query: " + er);
 					 			throw er;		    
