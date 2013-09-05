@@ -1,6 +1,7 @@
  var mysql 	= require("mysql");
 
 
+
  var dbName = "Pulse";
  var clientsTableName = "Clients";
  var hardwareTableName = "Hardware";
@@ -17,10 +18,12 @@ if(remoteConfig) {
 
    console.log("Found remote configuration"); 
 
-   var credentials = JSON.parse(remoteConfig)[0].credentials,
+   var credentials = JSON.parse(remoteConfig)['mysql-5.1'][0].credentials;
 
    console.log(credentials);
-   
+
+   dbName = credentials.name;
+
 	//remote connection
 	connection = mysql.createConnection({
 		host     :  credentials.hostname,
