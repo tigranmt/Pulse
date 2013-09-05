@@ -12,47 +12,69 @@
  var errorsTableName = "Errors";
  var connection = undefined;
 
- var remoteConfig = process.env.VCAP_SERVICES;
 
-if(remoteConfig) {
 
-   console.log("Found remote configuration"); 
 
-   var credentials = JSON.parse(remoteConfig)['mysql-5.1'][0].credentials;
 
-   console.log(credentials);
+var getConnection = function() {
+	if (connection && connection._socket
+            && connection._socket.readable
+            && connection._socket.writable) {
+        return  connection;
+    }
 
-   dbName = credentials.name;
+    console.log("Connection is closed or dead. Recreate it.");
+    var remoteConfig = process.env.VCAP_SERVICES;
 
-	//remote connection
-	connection = mysql.createConnection({
-		host     :  credentials.hostname,
-		user     :  credentials.user,
-		password :  credentials.password,				
+	if(remoteConfig) {
+
+	   console.log("Found remote configuration"); 
+
+	   var credentials = JSON.parse(remoteConfig)['mysql-5.1'][0].credentials;
+
+	   console.log(credentials);
+
+	   dbName = credentials.name;
+
+		//remote connection
+		connection = mysql.createConnection({
+			host     :  credentials.hostname,
+			user     :  credentials.user,
+			password :  credentials.password,				
+		});
+
+	 }
+	 else {
+
+	 	console.log("Local configuration");
+
+	 	//local connection
+	 	connection = mysql.createConnection({
+	 		host     : 'localhost',
+	  		user     : 'root',
+	  		password : ''
+	 
+		});
+	 }
+
+
+	connection.connect(function(err) {
+	     if(err != null) {
+	     	console.log(err);
+	     }
+	    
 	});
 
- }
- else {
- 	//local connection
- 	connection = mysql.createConnection({
- 		host     : 'localhost',
-  		user     : 'root',
-  		password : ''
- 
+	connection.on("close", function (err) {
+	    console.log("SQL CONNECTION CLOSED.");
 	});
- }
+	connection.on("error", function (err) {
+	    console.log("SQL CONNECTION ERROR: " + err);
+	});
 
 
-
-
-
-
-connection.connect(function(err) {
-     if(err != null) {
-     	console.log(err);
-     }
-    
-});
+	return connection;
+}
 
 
  //**********************************************************************************************************************************
@@ -60,7 +82,7 @@ connection.connect(function(err) {
  // CHECK IF DATABASE EXISTS, IF NOT, CREATE IT
  //**********************************************************************************************************************************
  //**********************************************************************************************************************************
-connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '" + dbName + "'", function( error, rows) {
+getConnection().query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '" + dbName + "'", function( error, rows) {
  
 
      if ( error ) {
@@ -73,17 +95,17 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
      	console.log("No any  database '" + dbName + "' found. Start creating it: ");
 
      	//Create Database 
-        connection.query("DROP DATABASE IF EXISTS " + dbName, function(err) {
+        getConnection().query("DROP DATABASE IF EXISTS " + dbName, function(err) {
 		  	//if (err) { throw err; }
 
 		  	// create database
-			connection.query("CREATE DATABASE " + dbName, function(err) {
+			getConnection().query("CREATE DATABASE " + dbName, function(err) {
 			  	//if (err) { throw err; }
 
 			  	console.log("Database " + dbName + " created");
 				console.log("Start creating tables");
 
-				connection.query("USE " + dbName, function(err) {
+				getConnection().query("USE " + dbName, function(err) {
 					if (err) { throw err; }
 
 			        //Create Clients table
@@ -97,7 +119,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 
  					console.log("Create " + clientsTableName + " table");
 
-					connection.query(createClientTable, function(err){
+					getConnection().query(createClientTable, function(err){
 								if (err) { throw err; }
 
 
@@ -113,7 +135,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 																"ID MEDIUMINT NOT NULL AUTO_INCREMENT," + 
 																"PRIMARY KEY (ID));";
 
-						 		connection.query(createHardwareTable, function(err){
+						 		getConnection().query(createHardwareTable, function(err){
 										if (err) { throw err; }
 
 
@@ -127,7 +149,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 																		"ID MEDIUMINT NOT NULL AUTO_INCREMENT," +      								
      																	 "PRIMARY KEY (ID))";
 
-										connection.query(createLogTable, function(err){
+										getConnection().query(createLogTable, function(err){
 												if (err) { throw err; }
 
 
@@ -145,7 +167,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 
 												console.log("ActionLog table SQL: " + createLogActionTable);
 
-												connection.query(createLogActionTable, function(err){
+												getConnection().query(createLogActionTable, function(err){
 														if (err) { throw err; }
 
 														var createActionsTable = "CREATE TABLE " + actionsTableName + " ( " + 	
@@ -156,7 +178,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 
 														console.log("Actions table SQL: " + createActionsTable);
 
-														connection.query(createActionsTable, function(err){
+														getConnection().query(createActionsTable, function(err){
 																
 																if (err) { throw err; }
 														
@@ -172,7 +194,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 																				"RegistrationHour VARCHAR(5)," + 
 																				"ID MEDIUMINT NOT NULL AUTO_INCREMENT," +      								
      																			"PRIMARY KEY (ID))"; 
-																connection.query(createLogErrorTable, function(err){
+																getConnection().query(createLogErrorTable, function(err){
 
 																	if (err) { throw err; }
 
@@ -182,7 +204,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 																					"ID MEDIUMINT NOT NULL AUTO_INCREMENT, " + 
     																				"PRIMARY KEY (ID))";
 
-																	connection.query(createErrorTable, function(err){
+																	getConnection().query(createErrorTable, function(err){
 
 																		if (err) { throw err; }
 
@@ -219,7 +241,7 @@ connection.query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHE
 
      }//if Database does not exist
      else {
-     	connection.query("USE " + dbName);
+     	getConnection().query("USE " + dbName);
      }
 	 
    
@@ -291,17 +313,17 @@ function insertLog(startData, opened, error) {
 
 
 	
- 	var hardwareIDEscaped =  connection.escape(startData.hardwareID); 
- 	var clientIDEscaped =  connection.escape(startData.clientCode);  	
- 	var registrationDateEscaped = connection.escape(startData.date);
-	var registrationHourEscaped = connection.escape(startData.hour);
-	var openedEscaped = connection.escape(opened);
+ 	var hardwareIDEscaped =  getConnection().escape(startData.hardwareID); 
+ 	var clientIDEscaped =  getConnection().escape(startData.clientCode);  	
+ 	var registrationDateEscaped = getConnection().escape(startData.date);
+	var registrationHourEscaped = getConnection().escape(startData.hour);
+	var openedEscaped = getConnection().escape(opened);
  	
 
  	var insertQuery = "INSERT INTO " + logTableName + " (ClientID, HardwareID, Opened, RegistrationDate, RegistrationHour) VALUES(" + 
  										clientIDEscaped + "," + hardwareIDEscaped + "," + openedEscaped + "," +  registrationDateEscaped + "," + registrationHourEscaped + ")";
 
- 	connection.query(insertQuery, function(err, rows) {
+ 	getConnection().query(insertQuery, function(err, rows) {
  		if(err) {
  			console.log( "Error on " +  logTableName + " table query: " + err);
  			error(err);
@@ -339,18 +361,18 @@ function hardwareTableCheck(startData, next, error) {
 		PRIMARY KEY ( HardwareID )						
 	);*/
 
- 	var hardwareIDEscaped =  mysql.escape(startData.hardwareID); 
- 	var appVersionEscaped =  mysql.escape(startData.appVersion); 
- 	var osEscaped =  mysql.escape(startData.os);
- 	var processorEscaped =  mysql.escape(startData.processor);
- 	var countryEscaped =  mysql.escape(startData.country);
+ 	var hardwareIDEscaped =  getConnection().escape(startData.hardwareID); 
+ 	var appVersionEscaped =  getConnection().escape(startData.appVersion); 
+ 	var osEscaped =  getConnection().escape(startData.os);
+ 	var processorEscaped =  getConnection().escape(startData.processor);
+ 	var countryEscaped =  getConnection().escape(startData.country);
 
    	var query = "SELECT HardwareID FROM " + hardwareTableName + " WHERE HardwareID=" + hardwareIDEscaped + " AND appVersion=" +  appVersionEscaped + 
  			" AND OS=" + osEscaped + " AND processor=" + processorEscaped + " AND country=" + countryEscaped; 
 
     console.log(query);
 
- 	connection.query(query, function(err, rows) {
+ 	getConnection().query(query, function(err, rows) {
 
  		if(err) {
  			console.log( "Error on " +  hardwareTableName + " table query: " + err);
@@ -362,8 +384,8 @@ function hardwareTableCheck(startData, next, error) {
         console.log(rows);
 
  		if(rows.length === 0) {
- 			var registrationDateEscaped = connection.escape(startData.date);
-		    var registrationHourEscaped = connection.escape(startData.hour);
+ 			var registrationDateEscaped = getConnection().escape(startData.date);
+		    var registrationHourEscaped = getConnection().escape(startData.hour);
 			console.log("No data found in " + hardwareTableName + " table. Start inserting data.");
 
 			
@@ -372,7 +394,7 @@ function hardwareTableCheck(startData, next, error) {
 														registrationDateEscaped + "," + registrationHourEscaped + ")";
 
  			console.log("Insert into " + hardwareTableName + " : " + insertQuery);
-			connection.query(insertQuery, function(e, rows) {				
+			getConnection().query(insertQuery, function(e, rows) {				
 
 		 			if ( e ) {
 				       console.log( "Error on " +  hardwareTableName + " table query: " + e );
@@ -422,15 +444,15 @@ function clientsTableCheck(startData, next, error) {
 		);
 	*/
 
-	var hardwareIDEscaped =  connection.escape(startData.hardwareID); 
-	var clientIDEscaped =  connection.escape(startData.clientCode); 
+	var hardwareIDEscaped =  getConnection().escape(startData.hardwareID); 
+	var clientIDEscaped =  getConnection().escape(startData.clientCode); 
 
 	
 
     var query = "SELECT ClientID FROM " + clientsTableName + " WHERE HardwareID=" + hardwareIDEscaped + " AND ClientID=" +  clientIDEscaped; 
     console.log(query);
 
-	connection.query(query, function(er, rows) {
+	getConnection().query(query, function(er, rows) {
 
 	  		 if ( er ) {
 		       console.log( "Error on " +  clientsTableName + " table query: " + er );
@@ -440,8 +462,8 @@ function clientsTableCheck(startData, next, error) {
 
 		     if(rows.length === 0) {
 
-		     	var registrationDateEscaped = connection.escape(startData.date);
-		     	var registrationHourEscaped = connection.escape(startData.hour);
+		     	var registrationDateEscaped = getConnection().escape(startData.date);
+		     	var registrationHourEscaped = getConnection().escape(startData.hour);
 		     	console.log("No data found in " + clientsTableName + " table. Start inserting data.");
 
 
@@ -450,7 +472,7 @@ function clientsTableCheck(startData, next, error) {
 				console.log(queryInsert);
 
 		     	//start inserting  
-		     	connection.query(queryInsert, function(e, rows) {
+		     	getConnection().query(queryInsert, function(e, rows) {
 
 				 		if ( e ) {
 					       console.log( "Error on " +  clientsTableName + " table query: " + e );
@@ -482,20 +504,20 @@ function saveStopData (stopData) {
 function  saveErrorData(errorData) {
 
 
- 	var hardwareIDEscaped 		= connection.escape(errorData.hardwareID); 
- 	var clientIDEscaped 		= connection.escape(errorData.clientCode);  
- 	var errorNameEscaped 		= connection.escape(errorData.errorName);  
- 	var errorValueEscaped 		= connection.escape(errorData.errorValue);  
- 	var appVersionEscaped 		= connection.escape(errorData.appVersion);  
- 	var registrationDateEscaped = connection.escape(errorData.date);
-	var registrationHourEscaped = connection.escape(errorData.hour);
+ 	var hardwareIDEscaped 		= getConnection().escape(errorData.hardwareID); 
+ 	var clientIDEscaped 		= getConnection().escape(errorData.clientCode);  
+ 	var errorNameEscaped 		= getConnection().escape(errorData.errorName);  
+ 	var errorValueEscaped 		= getConnection().escape(errorData.errorValue);  
+ 	var appVersionEscaped 		= getConnection().escape(errorData.appVersion);  
+ 	var registrationDateEscaped = getConnection().escape(errorData.date);
+	var registrationHourEscaped = getConnection().escape(errorData.hour);
  	
 
 	//first check if specified SAction is present in DB 
 
 
     var selectErrorQuery =  "SELECT ID FROM " +  errorsTableName + " WHERE ERROR=" + errorNameEscaped;
-    connection.query(selectErrorQuery, function(er, rows) {
+    getConnection().query(selectErrorQuery, function(er, rows) {
 
 
     	if(!rows || rows.length === 0) {
@@ -507,14 +529,14 @@ function  saveErrorData(errorData) {
     		var insertError = "INSERT INTO "  + errorsTableName + "(Error,Description) VALUES(" + errorNameEscaped + ", '')";
     		console.log(insertError);
 
-    		connection.query(insertError, function(er, rows) {
+    		getConnection().query(insertError, function(er, rows) {
     				if(er) {
 		 				console.log( "Error on " +  errorsTableName + " table query: " + er);
 		 				throw er;		    
 		 			}
 
 		 			//Select again to retrive assigned ID 
- 					connection.query(selectErrorQuery, function(er, rows) {
+ 					getConnection().query(selectErrorQuery, function(er, rows) {
  						if(er) throw er;
 
  						//insert into log errors with specified action ID
@@ -530,7 +552,7 @@ function  saveErrorData(errorData) {
 
  						console.log(insertQuery);
 
-					 	connection.query(insertQuery, function(er, rows) {
+					 	getConnection().query(insertQuery, function(er, rows) {
 					 		if(er) {
 					 			console.log( "Error on " +  logErrorsTableName + " table query: " + er);
 					 			throw er;		    
@@ -553,7 +575,7 @@ function  saveErrorData(errorData) {
 	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + errorValueEscaped + "," + appVersionEscaped + "," 
 	 											+ registrationDateEscaped + "," + registrationHourEscaped + ")";
 
-		 	connection.query(insertQuery, function(er, rows) {
+		 	getConnection().query(insertQuery, function(er, rows) {
 		 		if(er) {
 		 			console.log( "Error on " +  logErrorsTableName + " table query: " + er);
 		 			throw er;		    
@@ -590,20 +612,20 @@ function saveActionData (actionData) {
 	RegistrationHour VARCHAR(5),
 	PRIMARY KEY ( ClientID ));*/
 
- 	var hardwareIDEscaped 		= connection.escape(actionData.hardwareID); 
- 	var clientIDEscaped 		= connection.escape(actionData.clientCode);  
- 	var actionNameEscaped 		= connection.escape(actionData.actionName);  
- 	var actionValueEscaped 		= connection.escape(actionData.actionValue);  
- 	var appVersionEscaped 		= connection.escape(actionData.appVersion); 
- 	var registrationDateEscaped = connection.escape(actionData.date);
-	var registrationHourEscaped = connection.escape(actionData.hour);
+ 	var hardwareIDEscaped 		= getConnection().escape(actionData.hardwareID); 
+ 	var clientIDEscaped 		= getConnection().escape(actionData.clientCode);  
+ 	var actionNameEscaped 		= getConnection().escape(actionData.actionName);  
+ 	var actionValueEscaped 		= getConnection().escape(actionData.actionValue);  
+ 	var appVersionEscaped 		= getConnection().escape(actionData.appVersion); 
+ 	var registrationDateEscaped = getConnection().escape(actionData.date);
+	var registrationHourEscaped = getConnection().escape(actionData.hour);
  	
 
 	//first check if specified SAction is present in DB 
 
 
     var selectActionsQuery =  "SELECT ID FROM " +  actionsTableName + " WHERE ACTION=" + actionNameEscaped;
-    connection.query(selectActionsQuery, function(er, rows) {
+    getConnection().query(selectActionsQuery, function(er, rows) {
 
 
     	if(!rows || rows.length === 0) {
@@ -615,14 +637,14 @@ function saveActionData (actionData) {
     		var insertAction = "INSERT INTO "  + actionsTableName + "(Action,Description) VALUES(" + actionNameEscaped + ", '')";
     		console.log(insertAction);
 
-    		connection.query(insertAction, function(er, rows) {
+    		getConnection().query(insertAction, function(er, rows) {
     				if(er) {
 		 				console.log( "Error on " +  actionsTableName + " table query: " + er);
 		 				throw er;		    
 		 			}
 
 		 			//Select again to retrive assigned ID 
- 					connection.query(selectActionsQuery, function(er, selectedRows) {
+ 					getConnection().query(selectActionsQuery, function(er, selectedRows) {
  						if(er) throw er;
 
  						//insert into log actions with specified action ID
@@ -638,7 +660,7 @@ function saveActionData (actionData) {
 
  						console.log(insertQuery);
 
-					 	connection.query(insertQuery, function(er, insertRows) {
+					 	getConnection().query(insertQuery, function(er, insertRows) {
 					 		if(er) {
 					 			console.log( "Error on " +  logActionsTableName + " table query: " + er);
 					 			throw er;		    
@@ -662,7 +684,7 @@ function saveActionData (actionData) {
 	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + actionValueEscaped + ","  + appVersionEscaped + "," 
 	 										+ registrationDateEscaped + "," + registrationHourEscaped + ")";
 
-		 	connection.query(insertQuery, function(er, rows) {
+		 	getConnection().query(insertQuery, function(er, rows) {
 		 		if(er) {
 		 			console.log( "Error on " +  logActionsTableName + " table query: " + er);
 		 			throw er;		    
