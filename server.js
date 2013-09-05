@@ -6,11 +6,14 @@ var express        = require("express");
 var app= express();                                
 
 
-var port = process.env.VCAP_APP_PORT || 3000;
+var port = process.env.PORT || 3000;
 
 
 // Log the requests
 app.use(express.logger('dev'));
+
+
+
 
 
 

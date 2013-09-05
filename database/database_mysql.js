@@ -6,9 +6,9 @@
  var clientsTableName = "Clients";
  var hardwareTableName = "Hardware";
  var logTableName = "Log"; 
- var logActionsTableName = "Logaction";
+ var logActionsTableName = "LogAction";
  var actionsTableName = "Actions";
- var logErrorsTableName = "Logerror";
+ var logErrorsTableName = "LogError";
  var errorsTableName = "Errors";
  var connection = undefined;
 
@@ -549,8 +549,9 @@ function  saveErrorData(errorData) {
 
 			//insert into log errors with specified action ID
     		var id = rows[0].ID;
-	    	var insertQuery = "INSERT INTO " + logErrorsTableName + " (ClientID, HardwareID, Error, ErrorValue, RegistrationDate, RegistrationHour) VALUES(" + 
-	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + errorValueEscaped + "," + registrationDateEscaped + "," + registrationHourEscaped + ")";
+	    	var insertQuery = "INSERT INTO " + logErrorsTableName + " (ClientID, HardwareID, Error, ErrorValue, AppVersion, RegistrationDate, RegistrationHour) VALUES(" + 
+	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + errorValueEscaped + "," + appVersionEscaped + "," 
+	 											+ registrationDateEscaped + "," + registrationHourEscaped + ")";
 
 		 	connection.query(insertQuery, function(er, rows) {
 		 		if(er) {
@@ -655,9 +656,11 @@ function saveActionData (actionData) {
     	else {
 
 			//insert into log actions with specified action ID
+
     		var id = rows[0].ID;
-	    	var insertQuery = "INSERT INTO " + logActionsTableName + " (ClientID, HardwareID, Action, ActionValue, RegistrationDate, RegistrationHour) VALUES(" + 
-	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + actionValueEscaped + "," + registrationDateEscaped + "," + registrationHourEscaped + ")";
+	    	var insertQuery = "INSERT INTO " + logActionsTableName + " (ClientID, HardwareID, Action, ActionValue, AppVersion, RegistrationDate, RegistrationHour) VALUES(" + 
+	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + actionValueEscaped + ","  + appVersionEscaped + "," 
+	 										+ registrationDateEscaped + "," + registrationHourEscaped + ")";
 
 		 	connection.query(insertQuery, function(er, rows) {
 		 		if(er) {

@@ -1,6 +1,16 @@
 
 USE Pulse; 
 
+
+DROP TABLE Actions ;
+DROP TABLE Clients ;
+DROP TABLE Errors ;
+DROP TABLE Hardware ;
+DROP TABLE LogAction;
+DROP TABLE LogError;
+DROP TABLE Log;
+
+
 CREATE TABLE Clients (
 	ClientID SMALLINT(6), 
 	HardwareID VARCHAR(20), 
@@ -39,6 +49,7 @@ CREATE TABLE LogAction (
 	HardwareID VARCHAR(20), 
 	Action MEDIUMINT(30), 
 	ActionValue VARCHAR(30), 
+	AppVersion VARCHAR(16),
 	RegistrationDate VARCHAR(10), 
 	RegistrationHour VARCHAR(5), 
 	ID MEDIUMINT NOT NULL AUTO_INCREMENT,      								
@@ -50,7 +61,7 @@ CREATE TABLE Actions (
 	Action VARCHAR(30), 
 	Description VARCHAR(30), 	
 	ID MEDIUMINT NOT NULL AUTO_INCREMENT,      								
-    PRIMARY KEY (Action)
+    PRIMARY KEY (ID)
  );
 
  CREATE TABLE LogError ( 
@@ -58,6 +69,7 @@ CREATE TABLE Actions (
 	HardwareID VARCHAR(20),
 	Error MEDIUMINT,
 	ErrorValue VARCHAR(30),
+	AppVersion VARCHAR(16),
 	RegistrationDate VARCHAR(10),
 	RegistrationHour VARCHAR(5),
 	ID MEDIUMINT NOT NULL AUTO_INCREMENT,
