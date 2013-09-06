@@ -188,7 +188,7 @@ getConnection().query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE
 																				"ClientID SMALLINT(6)," + 
 																				"HardwareID VARCHAR(20)," + 
 																				"Error MEDIUMINT," + 
-																				"ErrorValue VARCHAR(30)," + 
+																				"ErrorValue VARCHAR(1000)," + 
 																				"AppVersion VARCHAR(16)," + 
 																				"RegistrationDate VARCHAR(10)," + 
 																				"RegistrationHour VARCHAR(5)," + 
@@ -200,7 +200,7 @@ getConnection().query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE
 
 																	var createErrorTable = "CREATE TABLE "  + errorsTableName + " ( " + 	
 																					"Error VARCHAR(30), " + 
-																					"Description VARCHAR(30), " + 
+																					"Description VARCHAR(1000), " + 
 																					"ID MEDIUMINT NOT NULL AUTO_INCREMENT, " + 
     																				"PRIMARY KEY (ID))";
 

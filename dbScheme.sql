@@ -47,7 +47,7 @@ CREATE TABLE Log (
 CREATE TABLE LogAction ( 
 	ClientID SMALLINT(6), 
 	HardwareID VARCHAR(20), 
-	Action VARCHAR(60), 
+	Action MEDIUMINT, 
 	ActionValue VARCHAR(30), 
 	AppVersion VARCHAR(16),
 	RegistrationDate VARCHAR(10), 
@@ -68,7 +68,7 @@ CREATE TABLE Actions (
 	ClientID SMALLINT(6),
 	HardwareID VARCHAR(20),
 	Error MEDIUMINT,
-	ErrorValue VARCHAR(30),
+	ErrorValue VARCHAR(1000),
 	AppVersion VARCHAR(16),
 	RegistrationDate VARCHAR(10),
 	RegistrationHour VARCHAR(5),
