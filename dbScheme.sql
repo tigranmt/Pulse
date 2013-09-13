@@ -12,7 +12,7 @@ DROP TABLE Log;
 
 
 CREATE TABLE Clients (
-	ClientID SMALLINT(6), 
+	ClientID MEDIUMINT, 
 	HardwareID VARCHAR(20), 
 	RegistrationDate VARCHAR(10), 
 	RegistrationHour VARCHAR(5), 
@@ -34,7 +34,7 @@ CREATE TABLE Hardware (
 );
 
 CREATE TABLE Log ( 
-	ClientID SMALLINT(6), 
+	ClientID MEDIUMINT, 
 	HardwareID VARCHAR(20), 
 	Opened BIT,	
 	RegistrationDate VARCHAR(10),  
@@ -45,7 +45,7 @@ CREATE TABLE Log (
 
 
 CREATE TABLE LogAction ( 
-	ClientID SMALLINT(6), 
+	ClientID MEDIUMINT, 
 	HardwareID VARCHAR(20), 
 	Action MEDIUMINT, 
 	ActionValue VARCHAR(30), 
@@ -65,7 +65,7 @@ CREATE TABLE Actions (
  );
 
  CREATE TABLE LogError ( 
-	ClientID SMALLINT(6),
+	ClientID MEDIUMINT,
 	HardwareID VARCHAR(20),
 	Error MEDIUMINT,
 	ErrorValue VARCHAR(1000),
@@ -81,5 +81,3 @@ CREATE TABLE Errors (
 	ID MEDIUMINT NOT NULL AUTO_INCREMENT,      								
     PRIMARY KEY (ID)
  );
-
-
