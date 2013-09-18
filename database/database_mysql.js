@@ -312,16 +312,20 @@ function insertLog(startData, opened, error) {
 	PRIMARY KEY ( ClientID ));*/
 
 
+
 	
- 	var hardwareIDEscaped =  getConnection().escape(startData.hardwareID); 
- 	var clientIDEscaped =  getConnection().escape(startData.clientCode);  	
+	var clientIDEscaped =  getConnection().escape(startData.clientCode);  	
+ 	var hardwareIDEscaped =  getConnection().escape(startData.hardwareID);  	
+ 	var openedEscaped = getConnection().escape(opened);
+ 	var appVersionEscaped = getConnection().escape(startData.appVersion);
  	var registrationDateEscaped = getConnection().escape(startData.date);
 	var registrationHourEscaped = getConnection().escape(startData.hour);
-	var openedEscaped = getConnection().escape(opened);
+	
+
  	
 
- 	var insertQuery = "INSERT INTO " + logTableName + " (ClientID, HardwareID, Opened, RegistrationDate, RegistrationHour) VALUES(" + 
- 										clientIDEscaped + "," + hardwareIDEscaped + "," + openedEscaped + "," +  registrationDateEscaped + "," + registrationHourEscaped + ")";
+ 	var insertQuery = "INSERT INTO " + logTableName + " (ClientID, HardwareID, Opened, AppVersion, RegistrationDate, RegistrationHour) VALUES(" + 
+ 										clientIDEscaped + "," + hardwareIDEscaped + "," + openedEscaped + "," + appVersionEscaped + ","  + registrationDateEscaped + "," + registrationHourEscaped + ")";
 
  	getConnection().query(insertQuery, function(err, rows) {
  		if(err) {

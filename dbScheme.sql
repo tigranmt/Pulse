@@ -13,7 +13,7 @@ DROP TABLE Log;
 
 CREATE TABLE Clients (
 	ClientID MEDIUMINT, 
-	HardwareID VARCHAR(20), 
+	HardwareID VARCHAR(50), 
 	RegistrationDate VARCHAR(10), 
 	RegistrationHour VARCHAR(5), 
 	ID MEDIUMINT NOT NULL AUTO_INCREMENT,
@@ -22,7 +22,7 @@ CREATE TABLE Clients (
 
 
 CREATE TABLE Hardware ( 
-	HardwareID VARCHAR(20), 
+	HardwareID VARCHAR(50), 
 	AppVersion VARCHAR(16), 
 	OS         VARCHAR(50), 
 	Processor  VARCHAR(50), 
@@ -35,8 +35,9 @@ CREATE TABLE Hardware (
 
 CREATE TABLE Log ( 
 	ClientID MEDIUMINT, 
-	HardwareID VARCHAR(20), 
+	HardwareID VARCHAR(50), 
 	Opened BIT,	
+	AppVersion VARCHAR(16),
 	RegistrationDate VARCHAR(10),  
 	RegistrationHour VARCHAR(5), 	
 	ID MEDIUMINT NOT NULL AUTO_INCREMENT,
@@ -46,7 +47,7 @@ CREATE TABLE Log (
 
 CREATE TABLE LogAction ( 
 	ClientID MEDIUMINT, 
-	HardwareID VARCHAR(20), 
+	HardwareID VARCHAR(50), 
 	Action MEDIUMINT, 
 	ActionValue VARCHAR(30), 
 	AppVersion VARCHAR(16),
@@ -66,7 +67,7 @@ CREATE TABLE Actions (
 
  CREATE TABLE LogError ( 
 	ClientID MEDIUMINT,
-	HardwareID VARCHAR(20),
+	HardwareID VARCHAR(50),
 	Error MEDIUMINT,
 	ErrorValue VARCHAR(1000),
 	AppVersion VARCHAR(16),
