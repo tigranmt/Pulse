@@ -16,44 +16,63 @@
 	<link href="web/css/bootstrap-responsive.min.css" rel="stylesheet">
 	<link href="web/css/style.css" rel="stylesheet">
 
-  <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-  <!--[if lt IE 9]>
-    <script src="js/html5shiv.js"></script>
-  <![endif]-->
 
-  <!-- Fav and touch icons -->
-  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="img/apple-touch-icon-144-precomposed.png">
-  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/apple-touch-icon-114-precomposed.png">
-  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/apple-touch-icon-72-precomposed.png">
-  <link rel="apple-touch-icon-precomposed" href="img/apple-touch-icon-57-precomposed.png">
-  <link rel="shortcut icon" href="img/favicon.png">
-  
 	
 </head>
 
 <body>
 
-	<div id="navigation" class="list-group">
-	     
-	  <a id="dashboardpage" href="dashboard" class="list-group-item">
-	  	<span class="glyphicon glyphicon-th-large"/> Dashboard
-	  </a>
+	
+	<nav class="navbar navbar-default  navbar-fixed-top" role="navigation">
+		  <!-- Brand and toggle get grouped for better mobile display -->
+		  <div class="navbar-header">
+		    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+		      <span class="sr-only">Toggle navigation</span>
+		      <span class="icon-bar"></span>
+		      <span class="icon-bar"></span>
+		      <span class="icon-bar"></span>
+		    </button>
+		    <a class="navbar-brand" href="#">Echo2</a>
+		  </div>
 
-	  <a id="usersstatpage" href="userstat" class="list-group-item">
-	  	<span class="glyphicon glyphicon-user"/> Users stat
-	  </a>
+		  <!-- Collect the nav links, forms, and other content for toggling -->
+		  <div class="collapse navbar-collapse navbar-ex1-collapse">
+		   
+		    <form class="navbar-form navbar-left" role="search">
+		      <div class="form-group">
+		      	<input class="startDate" type="date" class="form-control" placeholder="Text input"/>
+				<input class="endDate" type="date" class="form-control" placeholder="Text input"/>			      
+		      </div>
+		      <button type="button" class="btn btn-sm btn-success"> <span class="glyphicon glyphicon-refresh"></span> Update
+		      </button>
+		    </form>
+		   
+			<ul class="nav navbar-nav">			     		         
+				  <li id="dashboardpage" >
+				  	<a  href="dashboard"> Dashboard</a>
+				  </li>
 
+	 			  <li id="usersstatpage"  >
+		  			<a href="userstat"> Users stat</a>
+		  		  </li>
+
+		  		  <li id="errorspage" >
+			  		<a  href="errors"> Errors</a>
+			  	  </li>	  
+				 
+				   <li id="actionspage" class="active">
+				  	 <a href="actions"> Actions</a>
+				   </li>	  
+			</ul>
+ 
 	  
-	  <a id="errorspage" href="errors" class="list-group-item">
-	  	<span class="glyphicon glyphicon-exclamation-sign"/> Errors
-	  </a>
+		
 
-	 
-	  <a id="actionspage" href="actions" class="list-group-item active">
-	  	 <span class="glyphicon glyphicon-random"/> Actions
-	  </a>	  
 
-	</div>
+
+		  </div><!-- /.navbar-collapse -->
+	</nav>
+
 
 </body>
 

@@ -1,6 +1,8 @@
 
 var fs   = require("fs"); 
 var path = require('path');
+var url = require('url');
+var db = require("../database/database_mysql"); 
 
 
 function loadHtmlPage(req, res, pageName) {
@@ -111,9 +113,378 @@ function process(req, res) {
 }
 
 
-exports.welcome 	   = welcome; 
-exports.dashboard    = dahsboard;
-exports.userstat     = userstat;
-exports.errors       = errors;
-exports.actions      = actions;
-exports.process 	   = process; 
+
+function toDbFormattedDate(date) {
+   var splits = date.split("-"); 
+   return splits[2] + "/" + splits[1] + "/" + splits[0];
+}
+
+
+function getAppVersionsDistribution(req, res) {
+
+ 
+   var url_parts = url.parse(req.url, true);
+   var query = url_parts.query;
+
+   var startDate = toDbFormattedDate(query.startDate); 
+   var endDate = toDbFormattedDate(query.endDate);
+
+   var done = function(data)  {
+      var jsonData = JSON.stringify(data); 
+      console.log("Version distribution json: " + jsonData);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(jsonData);
+   }
+
+   var err = function(err) {
+      res.writeHead(500, err.message);
+   }
+
+   var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+      done : done,           //done callback 
+      err: err               //error callback
+   };
+
+   
+   db.getAppVersionsDistribution(params);
+
+}
+
+
+
+function getAvgUseTimePerDay(req, res) {
+
+ 
+   var url_parts = url.parse(req.url, true);
+   var query = url_parts.query;
+
+   var startDate = toDbFormattedDate(query.startDate); 
+   var endDate = toDbFormattedDate(query.endDate);
+
+   var done = function(data)  {
+
+
+      var returnData = []; 
+
+
+      var currentDate = "";     
+      var totMinutes = 0; 
+
+      var startToMinutes = 0;
+    
+      if(data.length >0)
+        currentDate = data[0].RegistrationDate;
+
+      var length = data.length;
+
+
+      for(var i=0; i<length;i++) {
+        var d = data[i];
+
+        /*For every second row caclulate difference in total minutes*/
+        if(d.Opened[0] === 0 && startToMinutes != undefined) {
+           var time = d.RegistrationHour.split(":"); 
+           time = parseInt(time[0]) * 60 + parseInt(time[1]);  //calculate total time in monutes
+             
+           totMinutes += (time - startToMinutes); //get the difference between current and previous row (in minutes)           
+           startToMinutes = undefined;
+
+        }
+        else {
+           startToMinutes= d.RegistrationHour.split(":"); 
+           startToMinutes = parseInt(startToMinutes[0]) * 60 + parseInt(startToMinutes[1]);
+        }
+
+        if(currentDate !== d.RegistrationDate || i === length - 1) {      
+          returnData.push({date:currentDate, totMin : totMinutes});
+          currentDate = d.RegistrationDate;
+          totMinutes = 0;
+        }
+
+        opened = d.Opened;
+    
+      }
+
+      var jsonData = JSON.stringify(returnData); 
+      console.log("Time per day json: " + jsonData);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(jsonData);
+   }
+
+   var err = function(err) {
+      res.writeHead(500, err.message);
+   }
+
+   var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+      done : done,           //done callback 
+      err: err               //error callback
+   };
+
+   
+   db.getAvgUseTimePerDay(params);
+
+}
+
+function getAvgUseTimePerDayByUser(req, res) {
+   var url_parts = url.parse(req.url, true);
+   var query = url_parts.query;
+
+   var startDate = toDbFormattedDate(query.startDate); 
+   var endDate = toDbFormattedDate(query.endDate);
+   var clientID = query.clientID;
+
+   var done = function(data)  {
+
+
+      var returnData = []; 
+
+
+      var currentDate = "";     
+      var totMinutes = 0; 
+
+      var startToMinutes = 0;
+    
+      if(data.length >0)
+        currentDate = data[0].RegistrationDate;
+
+      var length = data.length;
+
+
+      for(var i=0; i<length;i++) {
+        var d = data[i];
+
+        /*For every second row caclulate difference in total minutes*/
+        if(d.Opened[0] === 0 && startToMinutes != undefined) {
+           var time = d.RegistrationHour.split(":"); 
+           time = parseInt(time[0]) * 60 + parseInt(time[1]);  //calculate total time in monutes
+             
+           totMinutes += (time - startToMinutes); //get the difference between current and previous row (in minutes)           
+           startToMinutes = undefined;
+
+        }
+        else {
+           startToMinutes= d.RegistrationHour.split(":"); 
+           startToMinutes = parseInt(startToMinutes[0]) * 60 + parseInt(startToMinutes[1]);
+        }
+
+        if(currentDate !== d.RegistrationDate || i === length - 1) {      
+          returnData.push({date:currentDate, totMin : totMinutes});
+          currentDate = d.RegistrationDate;
+          totMinutes = 0;
+        }
+
+        opened = d.Opened;
+    
+      }
+
+      var jsonData = JSON.stringify(returnData); 
+      console.log("Time per day json: " + jsonData);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(jsonData);
+   }
+
+   var err = function(err) {
+      res.writeHead(500, err.message);
+   }
+
+   var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+      clientID  : clientID,  //clientID    
+      done : done,           //done callback 
+      err: err               //error callback
+   };
+
+   
+   db.getAvgUseTimePerDay(params);
+}
+
+
+
+function getErrorsDistributionInPeriod(req, res) 
+{
+   var url_parts = url.parse(req.url, true);
+   var query = url_parts.query;
+
+   var startDate = toDbFormattedDate(query.startDate); 
+   var endDate = toDbFormattedDate(query.endDate);
+
+
+   var done = function(data) {
+      var jsonData = JSON.stringify(data); 
+      console.log("Errors distribution: " + jsonData);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(jsonData);
+   }
+
+   var err = function(err) {
+      res.writeHead(500, err.message);
+   }
+
+   var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+      done : done,           //done callback 
+      err: err               //error callback
+   };
+
+   
+   console.log("GET ERROR DISTRIBUTION");
+   db.getErrorsDistributionInPeriod(params);
+}
+
+
+function getErrorsDistributionInPeriodByUser(req, res) 
+{
+   var url_parts = url.parse(req.url, true);
+   var query = url_parts.query;
+
+   var startDate = toDbFormattedDate(query.startDate); 
+   var endDate = toDbFormattedDate(query.endDate);
+   var clientID = query.clientID;
+
+
+   var done = function(data) {
+      var jsonData = JSON.stringify(data); 
+      console.log("Errors distribution: " + jsonData);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(jsonData);
+   }
+
+   var err = function(err) {
+      res.writeHead(500, err.message);
+   }
+
+   var params ={
+      startDate     : startDate, //start date 
+      endDate       : endDate,   //end date 
+      clientID      : clientID,  //client ID
+      done          : done,      //done callback 
+      err           : err        //error callback
+   };
+
+   
+   console.log("GET ERROR DISTRIBUTION");
+   db.getErrorsDistributionInPeriod(params);
+}
+
+
+function getOrdersStat(req, res) {
+
+   var url_parts = url.parse(req.url, true);
+   var query = url_parts.query;
+
+   var startDate = toDbFormattedDate(query.startDate); 
+   var endDate = toDbFormattedDate(query.endDate);
+
+
+   var done = function(data) {
+      var jsonData = JSON.stringify(data); 
+      console.log("Errors distribution: " + jsonData);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(jsonData);
+   }
+
+   var err = function(err) {
+      res.writeHead(500, err.message);
+   }
+
+   var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+      done : done,           //done callback 
+      err: err               //error callback
+   };
+   
+   console.log("GET ORDERS STAT");
+   db.getOrdersStat(params);
+}
+
+
+function getOrderStatByUser(req, res) {
+  var url_parts = url.parse(req.url, true);
+   var query = url_parts.query;
+
+   var startDate = toDbFormattedDate(query.startDate); 
+   var endDate = toDbFormattedDate(query.endDate);
+   var clientID = query.clientID;
+
+
+   var done = function(data) {
+      var jsonData = JSON.stringify(data); 
+      console.log("Errors distribution: " + jsonData);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(jsonData);
+   }
+
+   var err = function(err) {
+      res.writeHead(500, err.message);
+   }
+
+   var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+      clientID  : clientID,  //lcient ID
+      done : done,           //done callback 
+      err: err               //error callback
+   };
+   
+   console.log("GET ORDERS STAT");
+   db.getOrdersStat(params);
+}
+
+
+function getUserInfo(req, res) 
+{
+   var url_parts = url.parse(req.url, true);
+   var query = url_parts.query;
+
+   var startDate = toDbFormattedDate(query.startDate); 
+   var endDate = toDbFormattedDate(query.endDate);
+   var clientID = query.clientID;
+
+
+   var done = function(data) {
+      var jsonData = JSON.stringify(data); 
+      console.log("Errors distribution: " + jsonData);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(jsonData);
+   }
+
+   var err = function(err) {
+      res.writeHead(500, err.message);
+   }
+
+   var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+      clientID  : clientID,  //client ID
+      done : done,           //done callback 
+      err: err             //error callback
+   };
+   
+   console.log("GET USER INFO");
+   db.getUserInfo(params);
+}
+
+
+
+
+exports.welcome 	                          = welcome; 
+exports.dashboard                           = dahsboard;
+exports.userstat                            = userstat;
+exports.errors                              = errors;
+exports.actions                             = actions;
+exports.process 	                          = process; 
+exports.getAppVersionsDistribution          = getAppVersionsDistribution;
+exports.getAvgUseTimePerDay                 = getAvgUseTimePerDay;
+exports.getAvgUseTimePerDayByUser           = getAvgUseTimePerDayByUser;
+exports.getErrorsDistributionInPeriod       = getErrorsDistributionInPeriod;
+exports.getErrorsDistributionInPeriodByUser = getErrorsDistributionInPeriodByUser;
+exports.getOrdersStat                       = getOrdersStat;
+exports.getOrderStatByUser                  = getOrderStatByUser;
+exports.getUserInfo                         = getUserInfo;

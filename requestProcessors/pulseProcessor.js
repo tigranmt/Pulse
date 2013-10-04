@@ -117,8 +117,9 @@ function processErrorData(actionString) {
 
 
 
-exports.startData            = processStartData;
-exports.stopData             = processStopData;
-exports.actionData           = processActionData;
-exports.errorData            = processErrorData;
+exports.startData                    = processStartData;
+exports.stopData                     = processStopData;
+exports.actionData                   = processActionData;
+exports.errorData                    = processErrorData;
+
 

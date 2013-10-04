@@ -338,6 +338,8 @@ function insertLog(startData, opened, error) {
 }
 
 
+
+
 function hardwareTableCheck(startData, next, error) {
 
 
@@ -652,10 +654,7 @@ function saveActionData (actionData) {
  						if(er) throw er;
 
  						//insert into log actions with specified action ID
- 						var id = selectedRows[0].ID;
- 						console.log("rows"); 
- 						console.log(selectedRows);
-
+ 						var id = selectedRows[0].ID;						
 
  						var insertQuery = "INSERT INTO " + logActionsTableName + " (ClientID, HardwareID, Action, ActionValue, AppVersion, RegistrationDate, RegistrationHour) VALUES(" + 
 	 										clientIDEscaped + "," + hardwareIDEscaped + "," + id + "," + actionValueEscaped + "," + appVersionEscaped  
@@ -711,10 +710,246 @@ function getDashboardData() {
 }
 
 
+/* var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+      done : done,           //done callback 
+      err: err               //error callback
+ };*/
 
-exports.saveStartData    = saveStartData;
-exports.saveStopData     = saveStopData;
-exports.saveActionData   = saveActionData;
-exports.saveErrorData	 = saveErrorData;
-exports.getDashboardData = getDashboardData;
+function getAppVersionsDistribution(params) {
+
+    var start = getConnection().escape(params.startDate); 
+    var end   =  getConnection().escape(params.endDate); 
+	var querySelect = "SELECT  COUNT(*) as UsedCount, AppVersion FROM Log WHERE " + 
+		"STR_TO_DATE(RegistrationDate,'%d/%m/%Y') > STR_TO_DATE(" + start + ",'%d/%m/%Y') AND " + 
+		"STR_TO_DATE(RegistrationDate,'%d/%m/%Y') < STR_TO_DATE(" + end + ",'%d/%m/%Y') GROUP BY AppVersion";
+	
+	
+	console.log(querySelect);
+    getConnection().query(querySelect, function(er, rows) { 
+
+		if(er) {
+	 			console.log( "Error on  getAppVersionsDistribution  query: " + er);
+	 			params.err(er);	    
+	    }
+	    else {
+			if(!rows || rows.length === 0) {
+				console.log("empty data"); 
+				params.done([]);
+			}
+			else {			
+				params.done(rows); 
+			}
+		}
+
+    });
+}
+
+
+/* var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+       clientID  : clientID,  //CAN be present, but optional. In case there is, slice on clientID too.
+      done : done,           //done callback 
+      err: err               //error callback
+ };*/
+function getAvgUseTimePerDay(params) {
+
+	var start =  getConnection().escape(params.startDate); 
+    var end   =  getConnection().escape(params.endDate); 
+
+ 	var client = " ";
+    if(params.clientID) {
+    	client = params.clientID;
+    	if(client.trim() !== "") {
+    		client = " AND ClientID=" + getConnection().escape(client);
+    	}
+    	else {
+    		client = " ";
+    	}
+    }
+	var querySelect = "SELECT ClientID, HardwareID, Opened, RegistrationDate, RegistrationHour FROM Log WHERE STR_TO_DATE(RegistrationDate,'%d/%m/%Y') > STR_TO_DATE(" +  start +",'%d/%m/%Y') " + 
+						" AND STR_TO_DATE(RegistrationDate,'%d/%m/%Y') < STR_TO_DATE(" + end + ",'%d/%m/%Y') " + client + " ORDER BY STR_TO_DATE(RegistrationDate,'%d/%m/%Y'), ID ASC "; 
+						
+	console.log(querySelect);
+	
+	getConnection().query(querySelect, function(er, rows) { 
+
+		if(er) {
+	 			console.log( "Error on getAvgUseTimePerDay query: " + er);
+	 			params.err(er);	    
+	    }
+	    else {
+			if(!rows || rows.length === 0) {
+				console.log("empty data"); 
+				params.done([]);
+			}
+			else {			
+				params.done(rows); 
+			}
+		}
+
+    });
+	
+}
+
+
+/* var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+      clientID  : clientID,  //CAN be present, but optional. In case there is, slice on clientID too.
+      done : done,           //done callback 
+      err: err               //error callback
+ };*/
+function getErrorsDistributionInPeriod(params) {
+	var start = getConnection().escape(params.startDate); 
+    var end   =  getConnection().escape(params.endDate); 
+
+    var client = " ";
+    if(params.clientID) {
+    	client = params.clientID;
+    	if(client.trim() !== "") {
+    		client = " AND LogError.ClientID=" + getConnection().escape(client);
+    	}
+    	else {
+    		client = " ";
+    	}
+    }
+
+	var querySelect = "SELECT Errors.Error as ErrorTitle, Count(LogError.Error) as Count FROM LogError " + 
+					" INNER JOIN Errors ON LogError.Error = Errors.ID  WHERE STR_TO_DATE(LogError.RegistrationDate,'%d/%m/%Y') > STR_TO_DATE(" + start +  ",'%d/%m/%Y') " + 
+ 					" AND STR_TO_DATE(LogError.RegistrationDate,'%d/%m/%Y') < STR_TO_DATE(" + end + ",'%d/%m/%Y')  " + client +  "  GROUP BY LogError.Error"; 
+
+    console.log(querySelect);
+	
+	getConnection().query(querySelect, function(er, rows) { 
+
+		if(er) {
+	 			console.log( "Error on getAvgUseTimePerDay query: " + er);
+	 			params.err(er);	    
+	    }
+	    else {
+			if(!rows || rows.length === 0) {
+				console.log("empty data"); 
+				params.done([]);
+			}
+			else {			
+				params.done(rows); 
+			}
+		}
+
+    });
+}
+
+
+/* var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+      clientID  : clientID,  //CAN be present, but optional. In case there is, slice on clientID too.
+      done : done,           //done callback       
+      err: err               //error callback
+ };*/
+function getOrdersStat(params) {
+
+	var client = " ";
+    if(params.clientID) {
+    	client = params.clientID;
+    	if(client.trim() !== "") {
+    		client = " AND LogAction.ClientID=" + getConnection().escape(client);
+    	}
+    	else {
+    		client = " ";
+    	}
+    }
+
+
+    var start 	 =  getConnection().escape(params.startDate); 
+    var end   	 =  getConnection().escape(params.endDate); 
+   
+
+	var querySelect = "SELECT  Actions.Action as ActionName, Count(Actions.Action)  as Count " + 
+				" FROM LogAction INNER JOIN Actions ON LogAction.Action = Actions.ID WHERE  " + 
+				" STR_TO_DATE(LogAction.RegistrationDate,'%d/%m/%Y') > STR_TO_DATE(" + start +  ",'%d/%m/%Y') " + 
+				" AND STR_TO_DATE(LogAction.RegistrationDate,'%d/%m/%Y') < STR_TO_DATE(" + end + ",'%d/%m/%Y') " + 
+				" AND Actions.Action <> 'None'  AND  (Actions.Action = 'ORDERSENT' OR  Actions.Action = 'ORDERGENERATED' OR Actions.Action = 'STLEXPORT') " + 
+				client + " GROUP BY Actions.Action"; 
+
+	console.log(querySelect);
+	
+	getConnection().query(querySelect, function(er, rows) { 
+
+		if(er) {
+	 			console.log( "Error on getOrdersStat query: " + er);
+	 			params.err(er);	    
+	    }
+	    else {
+			if(!rows || rows.length === 0) {
+				console.log("empty data"); 
+				params.done([]);
+			}
+			else {			
+				params.done(rows); 
+			}
+		}
+
+    });
+
+}
+
+
+/* var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+      clientID  :  id,	      //client ID
+      done : done,           //done callback 
+      err: err               //error callback
+ };*/
+function getUserInfo(params) {
+
+	var start 	 =  getConnection().escape(params.startDate); 
+    var end   	 =  getConnection().escape(params.endDate); 
+    var client   =  getConnection().escape(params.clientID); 
+
+	var querySelect = "SELECT Clients.ClientID, Hardware.HardwareID, Hardware.RegistrationDate, Hardware.RegistrationHour, Hardware.AppVersion, " + 
+					   "Hardware.OS, Hardware.Processor, Hardware.Country FROM Clients INNER JOIN Hardware ON Clients.HardwareID = Hardware.HardwareID " + 
+					   " WHERE ClientID = " + client   + 
+					   " AND STR_TO_DATE(Hardware.RegistrationDate,'%d/%m/%Y') > STR_TO_DATE(" + start +  ",'%d/%m/%Y') " + 
+					   " AND STR_TO_DATE(Hardware.RegistrationDate,'%d/%m/%Y') < STR_TO_DATE(" + end + ",'%d/%m/%Y') " + 
+					   " ORDER BY STR_TO_DATE(Hardware.RegistrationDate,'%d/%m/%Y'), Hardware.HardwareID";
+
+	console.log(querySelect);
+	
+	getConnection().query(querySelect, function(er, rows) { 
+
+		if(er) {
+	 			console.log( "Error on getUserInfo query: " + er);
+	 			params.err(er);	    
+	    }
+	    else {
+			if(!rows || rows.length === 0) {
+				console.log("empty data"); 
+				params.done([]);
+			}
+			else {			
+				params.done(rows); 
+			}
+		}
+
+    });
+
+}
+
+
+
+exports.saveStartData    				= saveStartData;
+exports.saveStopData     				= saveStopData;
+exports.saveActionData   				= saveActionData;
+exports.saveErrorData	 				= saveErrorData;
+exports.getDashboardData 				= getDashboardData;
+exports.getAppVersionsDistribution 		= getAppVersionsDistribution;
+exports.getAvgUseTimePerDay 			= getAvgUseTimePerDay;
+exports.getErrorsDistributionInPeriod 	= getErrorsDistributionInPeriod;
+exports.getOrdersStat 					= getOrdersStat;
+exports.getUserInfo						= getUserInfo;
 
