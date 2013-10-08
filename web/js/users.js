@@ -26,6 +26,7 @@
     var ordersStat = [];
     var errorsDistribution=[];
     var appHoursPerDay = [];
+    var hardwareHistory = {};
 
 	
 
@@ -122,6 +123,10 @@
 			}
 
 			setGenericInfo(userGenericInfo); 
+			
+			setHardwareHistory(userData); 
+		
+
 		});
 
 		uInf.fail(function(err) {
@@ -217,6 +222,96 @@
     }
 
 
+    var getPresentHardwareIndex = function(arrHardwares, hardwareIDToSearch) {
+    	for(var i=0; i<arrHardwares.length;i++ ) {
+    		if(arrHardwares[i].hd === hardwareIDToSearch)
+    			return i;
+    	}
+
+    	return -1;
+    }
+
+
+    var setHardwareHistory = function(userHardwareData) {
+
+		hardwareHistory = {};
+
+		//holds actualt data visualizaed on the line chart 
+		hardwareHistory.data = [];
+
+
+		//holds mouse over line chart points
+		hardwareHistory.hoverCallback = function (index, options, content) {
+			var data = userHardwareData[index];
+			var index = getPresentHardwareIndex(hardwareHistory.uniqueHardwares, data.HardwareID); 
+			return "PC:" + (index + 1) + " -Date: " + data.RegistrationDate + " -App version:" + data.AppVersion;
+	    };
+		hardwareHistory.uniqueHardwares = [];
+    
+
+        //index of the PC (for every hardware key, generated new PC index)
+    	var pcIndex = 1;
+		var ykeys = [];
+		var labels = [];
+
+
+		for(var h=0; h<userHardwareData.length; h++) {
+
+            //constuct unique hardwares list
+			if(hardwareHistory.uniqueHardwares.length === 0 || 
+				getPresentHardwareIndex(hardwareHistory.uniqueHardwares, userHardwareData[h].HardwareID)<0) {
+					hardwareHistory.uniqueHardwares.push({hd: userHardwareData[h].HardwareID, index: pcIndex});
+					ykeys.push(pcIndex);
+					labels.push("PC" + pcIndex);
+					pcIndex++;
+			}
+		}
+
+		
+
+		//construct hardware history data for injecting it after to the chart
+    	for(var i=0; i<userHardwareData.length; i++) {
+    		var hd = userHardwareData[i];    	
+    	
+
+			//registration date AND PC
+			var splits = hd.RegistrationDate.split("/"); 
+			var dataString = splits[2] + "-" + splits[1] + "-" + splits[0];
+			
+			//construct graph data
+			var graphData = {}; 
+			graphData.month = dataString; 
+		
+
+
+            //inner loop
+            // parseInt(hd.AppVersion.replace(/\./g,''));
+			for(var unique = 0; unique<hardwareHistory.uniqueHardwares.length; unique++) {
+				var key = hardwareHistory.uniqueHardwares[unique];
+				if(key.hd === hd.HardwareID) {
+					graphData[key.index] = key.index;
+				}
+				else {
+					graphData[key.index] = null;
+				}
+
+
+			}
+
+			hardwareHistory.data.push(graphData);
+			
+    	}
+
+
+
+    	var params = {xkey : "month", ykey : ykeys, labels:labels, hoverCallback : hardwareHistory.hoverCallback};
+		$("#hardwareHistoryLine").empty();	
+		chartBinder.bindDataToChart("line", "hardwareHistoryLine", hardwareHistory.data, params); 
+
+    		
+    }
+
+
 	var setData = function() {
 
 		var start = $(".startDate").val(); 
@@ -227,8 +322,9 @@
 		$("#ordersStatByUser").empty();	        
 		$("#errorStatByUser").empty(); 
 	    $("#hoursPerDayBar").empty(); 
+	    $("#hardwareHistoryLine").empty();
 		
-	    
+
 		//get user generic info 
 		getUserGenericInfo(queryData);
 		// ---------------------------
@@ -244,6 +340,7 @@
 		//get user app using stat 
 		getAvgTimePerUser(queryData);
 		// -----------------
+
 
 
 	}; 
@@ -266,7 +363,11 @@
 	        	chartBinder.bindDataToChart("donut", "errorStatByUser", errorsDistribution);
 
 	        	$("#hoursPerDayBar").empty(); 
-				chartBinder.bindDataToChart("bar", "hoursPerDayBar", appHoursPerDay);      	
+				chartBinder.bindDataToChart("bar", "hoursPerDayBar", appHoursPerDay);      
+
+
+				$("#hardwareHistoryLine").empty();	
+				chartBinder.bindDataToChart("line", "hardwareHistoryLine", hardwareHistory.data);    
 	        		            
 
 	        }, 250);

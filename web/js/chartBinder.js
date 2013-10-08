@@ -1,6 +1,6 @@
 var chartBinder = {
 	
-	bindDataToChart : function(chartType, elemementName, data) {
+	bindDataToChart : function(chartType, elemementName, data, params) {
 
 
 
@@ -48,6 +48,29 @@ var chartBinder = {
 				  // chart.
 				  labels: ['Hours spent']
 				});
+			}
+			else if(chartType === "line") {
+				new Morris.Line({
+		  
+		  		  element: elemementName,
+		  
+				  /*data: [
+				    { month: '2012-01', value: 60 },
+				     ..
+				  ],*/ 
+
+				  hoverCallback: params.hoverCallback,
+
+				  data : data, 
+
+				  // The name of the data record attribute that contains x-values.
+				  xkey: params.xkey,
+				  // A list of names of data record attributes that contain y-values.
+				  ykeys: params.ykey,
+				  // Labels for the ykeys -- will be displayed when you hover over the
+				  // chart.
+				  labels: params.labels
+		});
 			}
 		}
 
