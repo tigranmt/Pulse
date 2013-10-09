@@ -22,11 +22,12 @@ CREATE TABLE Clients (
 
 
 CREATE TABLE Hardware ( 
-	HardwareID VARCHAR(50), 
-	AppVersion VARCHAR(16), 
-	OS         VARCHAR(50), 
-	Processor  VARCHAR(50), 
-	Country    VARCHAR(50),  
+	HardwareID 		 VARCHAR(50), 
+	AppVersion 		 VARCHAR(16), 
+	OS         		 VARCHAR(50), 
+	Processor  		 VARCHAR(50), 
+	Architecture  	 VARCHAR(50),
+	Country    		 VARCHAR(50),  
 	RegistrationDate VARCHAR(10),
 	RegistrationHour VARCHAR(5), 
 	ID MEDIUMINT NOT NULL AUTO_INCREMENT,

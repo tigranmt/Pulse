@@ -265,7 +265,8 @@ function saveStartData(startData) {
          version         : split[3], //version of the message 
          appVersion      : split[4], //application version
          os              : split[5], //OS name (XP, Vista, Windows7, Ubuntu....)
-         processor       : split[6], //processor info
+         processor       : split[6], //processor name 
+         architecture    : -- architeture available from new version
          country         : split[7], 
          date            : split[8], //execution date
          hour           :  split[9], //execution hour
@@ -373,6 +374,7 @@ function hardwareTableCheck(startData, next, error) {
  	var processorEscaped =  getConnection().escape(startData.processor);
  	var countryEscaped =  getConnection().escape(startData.country);
 
+
    	var query = "SELECT HardwareID FROM " + hardwareTableName + " WHERE HardwareID=" + hardwareIDEscaped + " AND appVersion=" +  appVersionEscaped + 
  			" AND OS=" + osEscaped + " AND processor=" + processorEscaped + " AND country=" + countryEscaped; 
 
@@ -395,8 +397,14 @@ function hardwareTableCheck(startData, next, error) {
 			console.log("No data found in " + hardwareTableName + " table. Start inserting data.");
 
 			
-			var insertQuery = "INSERT INTO " + hardwareTableName + " (HardwareID, AppVersion, OS, Processor, Country, RegistrationDate, RegistrationHour) VALUES(" + 
-											hardwareIDEscaped + "," + appVersionEscaped  + "," + osEscaped + "," + processorEscaped + "," + countryEscaped + "," + 
+ 			var architecture = startData.architecture || "";
+			if(architecture!= "")
+				architecture =getConnection().escape(architecture);
+			else 
+				architecture = null;
+
+			var insertQuery = "INSERT INTO " + hardwareTableName + " (HardwareID, AppVersion, OS, Processor, Architecture, Country, RegistrationDate, RegistrationHour) VALUES(" + 
+											hardwareIDEscaped + "," + appVersionEscaped  + "," + osEscaped + "," + processorEscaped + "," + architecture +  ","+ countryEscaped + "," + 
 														registrationDateEscaped + "," + registrationHourEscaped + ")";
 
  			console.log("Insert into " + hardwareTableName + " : " + insertQuery);
@@ -629,7 +637,6 @@ function saveActionData (actionData) {
 
 	//first check if specified SAction is present in DB 
 
-
     var selectActionsQuery =  "SELECT ID FROM " +  actionsTableName + " WHERE ACTION=" + actionNameEscaped;
     getConnection().query(selectActionsQuery, function(er, rows) {
 
@@ -700,14 +707,6 @@ function saveActionData (actionData) {
 
 }; 
 
-
-
-
-
-//Get overall information about data present in base
-function getDashboardData() {
-	
-}
 
 
 /* var params ={
@@ -826,7 +825,7 @@ function getErrorsDistributionInPeriod(params) {
 	getConnection().query(querySelect, function(er, rows) { 
 
 		if(er) {
-	 			console.log( "Error on getAvgUseTimePerDay query: " + er);
+	 			console.log( "Error on getErrorsDistributionInPeriod query: " + er);
 	 			params.err(er);	    
 	    }
 	    else {
@@ -941,12 +940,54 @@ function getUserInfo(params) {
 }
 
 
+/* var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date     
+      done : done,           //done callback 
+      err: err               //error callback
+ };*/
+function getOSDistribution(params) {
+
+	var start 	 =  getConnection().escape(params.startDate); 
+    var end   	 =  getConnection().escape(params.endDate); 
+    var client   =  getConnection().escape(params.clientID); 
+
+	var querySelect = "SELECT Clients.ClientID, Hardware.HardwareID, Hardware.RegistrationDate, Hardware.RegistrationHour, Hardware.AppVersion, " + 
+					   "Hardware.OS, Hardware.Processor, Hardware.Country FROM Clients INNER JOIN Hardware ON Clients.HardwareID = Hardware.HardwareID " + 
+					   " WHERE ClientID = " + client   + 
+					   " AND STR_TO_DATE(Hardware.RegistrationDate,'%d/%m/%Y') > STR_TO_DATE(" + start +  ",'%d/%m/%Y') " + 
+					   " AND STR_TO_DATE(Hardware.RegistrationDate,'%d/%m/%Y') < STR_TO_DATE(" + end + ",'%d/%m/%Y') " + 
+					   " ORDER BY STR_TO_DATE(Hardware.RegistrationDate,'%d/%m/%Y'), Hardware.HardwareID";
+
+	console.log(querySelect);
+	
+	getConnection().query(querySelect, function(er, rows) { 
+
+		if(er) {
+	 			console.log( "Error on getUserInfo query: " + er);
+	 			params.err(er);	    
+	    }
+	    else {
+			if(!rows || rows.length === 0) {
+				console.log("empty data"); 
+				params.done([]);
+			}
+			else {			
+				params.done(rows); 
+			}
+		}
+
+    });
+
+
+}
+
+
 
 exports.saveStartData    				= saveStartData;
 exports.saveStopData     				= saveStopData;
 exports.saveActionData   				= saveActionData;
 exports.saveErrorData	 				= saveErrorData;
-exports.getDashboardData 				= getDashboardData;
 exports.getAppVersionsDistribution 		= getAppVersionsDistribution;
 exports.getAvgUseTimePerDay 			= getAvgUseTimePerDay;
 exports.getErrorsDistributionInPeriod 	= getErrorsDistributionInPeriod;

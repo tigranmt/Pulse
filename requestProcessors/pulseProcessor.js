@@ -25,18 +25,44 @@ function processStartData(startString) {
 
     
     var split   = startString.split(splitChar);
-    var packet = {             
-         crypto          : split[0], //encrypted key
-         hardwareID      : split[1], //unique hardware ID
-         clientCode      : split[2], //client code 
-         version         : split[3], //version of the message 
-         appVersion      : split[4], //application version
-         os              : split[5], //OS name (XP, Vista, Windows7, Ubuntu....)
-         processor       : split[6], //processor info
-         country         : split[7], 
-         date            : split[8], //execution date
-         hour            : split[9]  //execution hour
-    };
+    var version = split[3]; 
+
+    console.log("START DATA packet VERSION: " + version);
+
+
+    var packet = { }; 
+    if(version === "1") {
+        packet = {
+             crypto          : split[0], //encrypted key
+             hardwareID      : split[1], //unique hardware ID
+             clientCode      : split[2], //client code 
+             version         : split[3], //version of the message 
+             appVersion      : split[4], //application version
+             os              : split[5], //OS name (XP, Vista, Windows7, Ubuntu....)
+             processor       : split[6], //processor name            
+             country         : split[7], 
+             date            : split[8], //execution date
+             hour            : split[9]  //execution hour
+        };
+    }
+    else if(version === "2") 
+    {
+        packet = {             
+             crypto          : split[0], //encrypted key
+             hardwareID      : split[1], //unique hardware ID
+             clientCode      : split[2], //client code 
+             version         : split[3], //version of the message 
+             appVersion      : split[4], //application version
+             os              : split[5], //OS name (XP, Vista, Windows7, Ubuntu....)
+             processor       : split[6], //processor name
+             architecture    : split[7], //processor architecture
+             country         : split[8], 
+             date            : split[9], //execution date
+             hour            : split[10]  //execution hour
+        };
+    }
+
+
 
 
     if(!canPass(packet)) {

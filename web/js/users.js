@@ -367,8 +367,7 @@
 
 
 				$("#hardwareHistoryLine").empty();	
-				chartBinder.bindDataToChart("line", "hardwareHistoryLine", hardwareHistory.data);    
-	        		            
+				setHardwareHistory(userData); 	        		            
 
 	        }, 250);
 	    });
