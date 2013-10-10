@@ -48,6 +48,10 @@ app.post('/pulse/error', function(req, res){
 app.post('/pulse/getAppVersionsDistribution', function(req, res){    
     processPulseRequest(req, res, pulseProcessor.getAppVersionsDistribution);  
 });
+
+app.post('/pulse/license', function(req, res){    
+    processPulseRequest(req, res, pulseProcessor.processLicenseData);  
+});
 /********************************/
 
 

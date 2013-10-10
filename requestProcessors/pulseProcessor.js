@@ -128,8 +128,8 @@ function processErrorData(actionString) {
              clientCode      : split[2], //client code 
              version         : split[3], //version of the message 
              appVersion      : split[4], //application version
-             errorName      : split[5],  //error name
-             errorValue     : split[6],  //error value            
+             errorName       : split[5],  //error name
+             errorValue      : split[6],  //error value            
              date            : split[7], //execution date
              hour            : split[8]  //execution hour
         };
@@ -143,9 +143,32 @@ function processErrorData(actionString) {
 
 
 
+
+function processLicenseData(licenseData) {
+        var split   = licenseData.split(splitChar);
+        var licenseData = {             
+            crypto          : split[0], //encrypted key
+            hardwareID      : split[1], //unique hardware ID
+            clientCode      : split[2], //client code 
+            version         : split[3], // message version 
+            date            : split[4], //execution date
+            hour            : split[5], //execution hour   
+            licenseID       : split[6], //license ID   
+            validTill       : split[7], // valid till date
+            appVersion      : split[8], //application version               
+        };
+        
+
+        if(!canPass(licenseData))
+            return false;
+
+        db.saveLicense(licenseData);
+}
+
+
 exports.startData                    = processStartData;
 exports.stopData                     = processStopData;
 exports.actionData                   = processActionData;
 exports.errorData                    = processErrorData;
-
+exports.processLicenseData           = processLicenseData;
 

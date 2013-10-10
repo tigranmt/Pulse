@@ -2,13 +2,14 @@
 USE Pulse; 
 
 
-DROP TABLE Actions ;
-DROP TABLE Clients ;
-DROP TABLE Errors ;
-DROP TABLE Hardware ;
-DROP TABLE LogAction;
-DROP TABLE LogError;
-DROP TABLE Log;
+DROP TABLE Actions;
+DROP TABLE Clients;
+DROP TABLE Errors;
+DROP TABLE Hardwares;
+DROP TABLE LogActions;
+DROP TABLE LogErrors;
+DROP TABLE Logs;
+DROP TABLE LogLicenses;
 
 
 CREATE TABLE Clients (
@@ -21,7 +22,7 @@ CREATE TABLE Clients (
 );
 
 
-CREATE TABLE Hardware ( 
+CREATE TABLE Hardwares ( 
 	HardwareID 		 VARCHAR(50), 
 	AppVersion 		 VARCHAR(16), 
 	OS         		 VARCHAR(50), 
@@ -34,7 +35,7 @@ CREATE TABLE Hardware (
 	PRIMARY KEY (ID)
 );
 
-CREATE TABLE Log ( 
+CREATE TABLE Logs ( 
 	ClientID MEDIUMINT, 
 	HardwareID VARCHAR(50), 
 	Opened BIT,	
@@ -46,7 +47,7 @@ CREATE TABLE Log (
 );
 
 
-CREATE TABLE LogAction ( 
+CREATE TABLE LogActions ( 
 	ClientID MEDIUMINT, 
 	HardwareID VARCHAR(50), 
 	Action MEDIUMINT, 
@@ -66,7 +67,7 @@ CREATE TABLE Actions (
     PRIMARY KEY (ID)
  );
 
- CREATE TABLE LogError ( 
+ CREATE TABLE LogErrors ( 
 	ClientID MEDIUMINT,
 	HardwareID VARCHAR(50),
 	Error MEDIUMINT,
@@ -81,5 +82,18 @@ CREATE TABLE Errors (
 	Error VARCHAR(30), 
 	Description VARCHAR(30), 	
 	ID MEDIUMINT NOT NULL AUTO_INCREMENT,      								
+    PRIMARY KEY (ID)
+ );
+
+
+CREATE TABLE LogLicenses( 
+	ClientID MEDIUMINT,
+	HardwareID VARCHAR(50),
+	RegistrationDate VARCHAR(10),
+	RegistrationHour VARCHAR(5),
+	LicenseID VARCHAR(16), 
+	ValidTill VARCHAR(10),	
+	AppVersion VARCHAR(16),	
+	ID MEDIUMINT NOT NULL AUTO_INCREMENT,
     PRIMARY KEY (ID)
  );
