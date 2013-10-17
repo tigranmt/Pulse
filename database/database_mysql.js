@@ -846,7 +846,7 @@ function getErrorsDistributionInPeriod(params) {
     if(params.clientID) {
     	client = params.clientID;
     	if(client.trim() !== "") {
-    		client = " AND LogError.ClientID=" + getConnection().escape(client);
+    		client = " AND " + logErrorsTableName + ".ClientID=" + getConnection().escape(client);
     	}
     	else {
     		client = " ";
@@ -878,6 +878,83 @@ function getErrorsDistributionInPeriod(params) {
     });
 }
 
+/* var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date       
+      done : done,           //done callback 
+      err: err               //error callback
+ };*/
+function  getErrorDistributionInPeriodByType(params) {
+
+	var start = getConnection().escape(params.startDate); 
+    var end   =  getConnection().escape(params.endDate); 
+
+	var querySelect = "SELECT " + errorsTableName + ".Error as ErrorTitle, Count(" + logErrorsTableName + ".Error) as Count, " + logErrorsTableName + ".RegistrationDate, " + logErrorsTableName + ".AppVersion FROM " + errorsTableName + 
+ 						" INNER JOIN " + logErrorsTableName + " ON " + logErrorsTableName + ".Error = " + errorsTableName +".ID  WHERE STR_TO_DATE(" + logErrorsTableName + ".RegistrationDate,'%d/%m/%Y') > STR_TO_DATE(" + start + ",'%d/%m/%Y')  " + 
+ 						" AND STR_TO_DATE(" + logErrorsTableName + ".RegistrationDate,'%d/%m/%Y') < STR_TO_DATE(" + end + ",'%d/%m/%Y')  GROUP BY " + logErrorsTableName + ".Error,  " + logErrorsTableName + ".RegistrationDate, " + 
+ 						 logErrorsTableName + ".AppVersion ORDER BY " + logErrorsTableName + ".RegistrationDate" ;
+
+
+ 	console.log(querySelect);
+	
+	getConnection().query(querySelect, function(er, rows) { 
+
+		if(er) {
+	 			console.log( "Error on getErrorDistributionInPeriodByType query: " + er);
+	 			params.err(er);	    
+	    }
+	    else {
+			if(!rows || rows.length === 0) {
+				console.log("empty data"); 
+				params.done([]);
+			}
+			else {			
+				params.done(rows); 
+			}
+		}
+
+    });
+}
+
+
+/* var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date       
+      done : done,           //done callback 
+      err: err               //error callback
+ };*/
+function  getErrorLogInPeriod(params) {
+
+	var start = getConnection().escape(params.startDate); 
+    var end   =  getConnection().escape(params.endDate); 
+
+	var querySelect = "SELECT " + errorsTableName + ".Error as ErrorTitle, " + logErrorsTableName + ".RegistrationDate, " + logErrorsTableName + ".RegistrationHour, " + logErrorsTableName + ".AppVersion, " + logErrorsTableName + ".ClientID, " + logErrorsTableName + ".ErrorValue  FROM " + 
+    errorsTableName + " INNER JOIN " + logErrorsTableName + " ON " + logErrorsTableName + ".Error = " + errorsTableName + ".ID  WHERE STR_TO_DATE(" + logErrorsTableName + ".RegistrationDate,'%d/%m/%Y') > STR_TO_DATE(" + start + ",'%d/%m/%Y') " +  
+       " AND STR_TO_DATE(" + logErrorsTableName + ".RegistrationDate,'%d/%m/%Y') < STR_TO_DATE(" + end + ",'%d/%m/%Y')  ORDER BY " + logErrorsTableName + ".RegistrationDate DESC" ;
+
+
+ 	console.log(querySelect);
+	
+	getConnection().query(querySelect, function(er, rows) { 
+
+		if(er) {
+	 			console.log( "Error on getErrorLogInPeriod query: " + er);
+	 			params.err(er);	    
+	    }
+	    else {
+			if(!rows || rows.length === 0) {
+				console.log("empty data"); 
+				params.done([]);
+			}
+			else {			
+				params.done(rows); 
+			}
+		}
+
+    });
+}
+
+
 
 /* var params ={
       startDate : startDate, //start date 
@@ -892,7 +969,7 @@ function getOrdersStat(params) {
     if(params.clientID) {
     	client = params.clientID;
     	if(client.trim() !== "") {
-    		client = " AND LogAction.ClientID=" + getConnection().escape(client);
+    		client = " AND " + logActionsTableName + ".ClientID=" + getConnection().escape(client);
     	}
     	else {
     		client = " ";
@@ -947,12 +1024,12 @@ function getUserInfo(params) {
     var end   	 =  getConnection().escape(params.endDate); 
     var client   =  getConnection().escape(params.clientID); 
 
-	var querySelect = "SELECT Clients.ClientID, Hardware.HardwareID, Hardware.RegistrationDate, Hardware.RegistrationHour, Hardware.AppVersion, " + 
-					   "Hardware.OS, Hardware.Processor, Hardware.Country FROM Clients INNER JOIN Hardware ON Clients.HardwareID = Hardware.HardwareID " + 
+	var querySelect = "SELECT " + clientsTableName + ".ClientID, " + hardwareTableName + ".HardwareID, " + hardwareTableName + ".RegistrationDate, " + hardwareTableName + ".RegistrationHour, " + hardwareTableName + ".AppVersion, " + 
+					   hardwareTableName + ".OS, " + hardwareTableName +".Processor, " + hardwareTableName + ".Country FROM " + clientsTableName + " INNER JOIN " + hardwareTableName + " ON " + clientsTableName +".HardwareID = " + hardwareTableName + ".HardwareID " + 
 					   " WHERE ClientID = " + client   + 
-					   " AND STR_TO_DATE(Hardware.RegistrationDate,'%d/%m/%Y') > STR_TO_DATE(" + start +  ",'%d/%m/%Y') " + 
-					   " AND STR_TO_DATE(Hardware.RegistrationDate,'%d/%m/%Y') < STR_TO_DATE(" + end + ",'%d/%m/%Y') " + 
-					   " ORDER BY STR_TO_DATE(Hardware.RegistrationDate,'%d/%m/%Y'), Hardware.HardwareID";
+					   " AND STR_TO_DATE(" + hardwareTableName + ".RegistrationDate,'%d/%m/%Y') > STR_TO_DATE(" + start +  ",'%d/%m/%Y') " + 
+					   " AND STR_TO_DATE(" +  hardwareTableName+ ".RegistrationDate,'%d/%m/%Y') < STR_TO_DATE(" + end + ",'%d/%m/%Y') " + 
+					   " ORDER BY STR_TO_DATE(" + hardwareTableName + ".RegistrationDate,'%d/%m/%Y'), " + hardwareTableName + ".HardwareID";
 
 	console.log(querySelect);
 	
@@ -1016,19 +1093,20 @@ function getOSDistribution(params) {
 
     });
 
-
 }
 
 
 
-exports.saveStartData    				= saveStartData;
-exports.saveStopData     				= saveStopData;
-exports.saveActionData   				= saveActionData;
-exports.saveErrorData	 				= saveErrorData;
-exports.getAppVersionsDistribution 		= getAppVersionsDistribution;
-exports.getAvgUseTimePerDay 			= getAvgUseTimePerDay;
-exports.getErrorsDistributionInPeriod 	= getErrorsDistributionInPeriod;
-exports.getOrdersStat 					= getOrdersStat;
-exports.getUserInfo						= getUserInfo;
-exports.saveLicense						= saveLicense;
+exports.saveStartData    					= saveStartData;
+exports.saveStopData     					= saveStopData;
+exports.saveActionData   					= saveActionData;
+exports.saveErrorData	 					= saveErrorData;
+exports.getAppVersionsDistribution 			= getAppVersionsDistribution;
+exports.getAvgUseTimePerDay 				= getAvgUseTimePerDay;
+exports.getErrorsDistributionInPeriod 		= getErrorsDistributionInPeriod;
+exports.getErrorDistributionInPeriodByType 	= getErrorDistributionInPeriodByType;
+exports.getErrorLogInPeriod 				= getErrorLogInPeriod;
+exports.getOrdersStat 						= getOrdersStat;
+exports.getUserInfo							= getUserInfo;
+exports.saveLicense							= saveLicense;
 

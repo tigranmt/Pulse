@@ -117,6 +117,20 @@ app.get('/userstat/getAvgUseTimePerDayByUser', function(req, res){
 
 
 
+app.get('/errors/getErrorDistributionInPeriodByType', function(req, res){     
+   console.log("ERRORS/ERRORS DISTRIBUTION BY DATE AND TYPE");
+   webProcessor.getErrorDistributionInPeriodByType(req,res);  
+});
+
+
+app.get('/errors/getErrorLogInPeriod', function(req, res){     
+   console.log("ERRORS/ERRORS LOG");
+   webProcessor.getErrorLogInPeriod(req,res);  
+});
+
+
+
+
 
 app.get('/userstat', function(req, res){     
    console.log("USERSTAT");

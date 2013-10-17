@@ -2,10 +2,10 @@
 
 	var curDate = new Date();	
 	var month = curDate.getMonth() ;
-	var startDate = curDate.getFullYear() + "-" + ("0" + month).slice(-2) + "-" + ("0" + curDate.getDay()).slice(-2); 
+	var startDate = curDate.getFullYear() + "-" + ("0" + month).slice(-2) + "-" + ("0" + curDate.getDate()).slice(-2); 
 
 	month++; 
-	var endDate = curDate.getFullYear() + "-" + ("0" + month).slice(-2) + "-" + ("0" + curDate.getDay()).slice(-2); 
+	var endDate = curDate.getFullYear() + "-" + ("0" + month).slice(-2) + "-" + ("0" + curDate.getDate()).slice(-2); 
 	$(".startDate").val(startDate);
 	$(".endDate").val(endDate);
 	
@@ -56,10 +56,13 @@
 	            return 1;
 	        }
 
-	        if (v1parts[i] == v2parts[i]) {
+	        var intv1Parts = parseInt(v1parts[i]); 
+	        var intv2Parts = parseInt(v2parts[i]); 
+
+	        if (intv1Parts == intv2Parts) {
 	            continue;
 	        }
-	        else if (v1parts[i] > v2parts[i]) {
+	        else if (intv1Parts > intv2Parts) {
 	            return 1;
 	        }
 	        else {
@@ -298,17 +301,14 @@
 
 			}
 
-			hardwareHistory.data.push(graphData);
-			
+			hardwareHistory.data.push(graphData);			
     	}
-
 
 
     	var params = {xkey : "month", ykey : ykeys, labels:labels, hoverCallback : hardwareHistory.hoverCallback};
 		$("#hardwareHistoryLine").empty();	
 		chartBinder.bindDataToChart("line", "hardwareHistoryLine", hardwareHistory.data, params); 
-
-    		
+		
     }
 
 
@@ -340,9 +340,6 @@
 		//get user app using stat 
 		getAvgTimePerUser(queryData);
 		// -----------------
-
-
-
 	}; 
 
 	setData(); 
@@ -363,8 +360,7 @@
 	        	chartBinder.bindDataToChart("donut", "errorStatByUser", errorsDistribution);
 
 	        	$("#hoursPerDayBar").empty(); 
-				chartBinder.bindDataToChart("bar", "hoursPerDayBar", appHoursPerDay);      
-
+				chartBinder.bindDataToChart("bar", "hoursPerDayBar", appHoursPerDay);  
 
 				$("#hardwareHistoryLine").empty();	
 				setHardwareHistory(userData); 	        		            

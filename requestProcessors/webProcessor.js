@@ -337,6 +337,37 @@ function getErrorsDistributionInPeriod(req, res)
    db.getErrorsDistributionInPeriod(params);
 }
 
+function getErrorDistributionInPeriodByType(req, res) {
+   var url_parts = url.parse(req.url, true);
+   var query = url_parts.query;
+
+   var startDate = toDbFormattedDate(query.startDate); 
+   var endDate = toDbFormattedDate(query.endDate);
+
+
+   var done = function(data) {
+      var jsonData = JSON.stringify(data); 
+      console.log("Errors distribution: " + jsonData);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(jsonData);
+   }
+
+   var err = function(err) {
+      res.writeHead(500, err.message);
+   }
+
+   var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+      done : done,           //done callback 
+      err: err               //error callback
+   };
+
+   
+   console.log("GET ERROR DISTRIBUTION BY DATE AND TYPE");
+   db.getErrorDistributionInPeriodByType(params);
+}
+
 
 function getErrorsDistributionInPeriodByUser(req, res) 
 {
@@ -370,6 +401,37 @@ function getErrorsDistributionInPeriodByUser(req, res)
    
    console.log("GET ERROR DISTRIBUTION");
    db.getErrorsDistributionInPeriod(params);
+}
+
+
+function getErrorLogInPeriod(req, res) {
+   var url_parts = url.parse(req.url, true);
+   var query = url_parts.query;
+
+   var startDate = toDbFormattedDate(query.startDate); 
+   var endDate = toDbFormattedDate(query.endDate);
+
+
+   var done = function(data) {
+      var jsonData = JSON.stringify(data); 
+      console.log("Errors getErrorLogInPeriod: " + jsonData);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(jsonData);
+   }
+
+   var err = function(err) {
+      res.writeHead(500, err.message);
+   }
+
+   var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date 
+      done : done,           //done callback 
+      err: err               //error callback
+   };
+   
+   console.log("GET ERRORS LOG");
+   db.getErrorLogInPeriod(params);
 }
 
 
@@ -474,17 +536,19 @@ function getUserInfo(req, res)
 
 
 
-exports.welcome 	                          = welcome; 
-exports.dashboard                           = dahsboard;
-exports.userstat                            = userstat;
-exports.errors                              = errors;
-exports.actions                             = actions;
-exports.process 	                          = process; 
-exports.getAppVersionsDistribution          = getAppVersionsDistribution;
-exports.getAvgUseTimePerDay                 = getAvgUseTimePerDay;
-exports.getAvgUseTimePerDayByUser           = getAvgUseTimePerDayByUser;
-exports.getErrorsDistributionInPeriod       = getErrorsDistributionInPeriod;
-exports.getErrorsDistributionInPeriodByUser = getErrorsDistributionInPeriodByUser;
-exports.getOrdersStat                       = getOrdersStat;
-exports.getOrderStatByUser                  = getOrderStatByUser;
-exports.getUserInfo                         = getUserInfo;
+exports.welcome 	                              = welcome; 
+exports.dashboard                               = dahsboard;
+exports.userstat                                = userstat;
+exports.errors                                  = errors;
+exports.actions                                 = actions;
+exports.process 	                              = process; 
+exports.getAppVersionsDistribution              = getAppVersionsDistribution;
+exports.getAvgUseTimePerDay                     = getAvgUseTimePerDay;
+exports.getAvgUseTimePerDayByUser               = getAvgUseTimePerDayByUser;
+exports.getErrorsDistributionInPeriod           = getErrorsDistributionInPeriod;
+exports.getErrorDistributionInPeriodByType      = getErrorDistributionInPeriodByType;
+exports.getErrorsDistributionInPeriodByUser     = getErrorsDistributionInPeriodByUser;
+exports.getErrorLogInPeriod                     = getErrorLogInPeriod;
+exports.getOrdersStat                           = getOrdersStat;
+exports.getOrderStatByUser                      = getOrderStatByUser;
+exports.getUserInfo                             = getUserInfo;

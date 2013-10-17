@@ -3,10 +3,11 @@
 	//assign start and end date to the current and one week ago
 	var curDate = new Date();	
 	var month = curDate.getMonth() ;
-	var startDate = curDate.getFullYear() + "-" + ("0" + month).slice(-2) + "-" + ("0" + curDate.getDay()).slice(-2); 
+	var locale = curDate.toLocaleDateString(); 
+	var startDate = curDate.getFullYear() + "-" + ("0" + month).slice(-2) + "-" + ("0" + curDate.getDate()).slice(-2); 
 
 	month++; 
-	var endDate = curDate.getFullYear() + "-" + ("0" + month).slice(-2) + "-" + ("0" + curDate.getDay()).slice(-2); 
+	var endDate = curDate.getFullYear() + "-" + ("0" + month).slice(-2) + "-" + ("0" + curDate.getDate()).slice(-2); 
 	$(".startDate").val(startDate);
 	$(".endDate").val(endDate);
 	
