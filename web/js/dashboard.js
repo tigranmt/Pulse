@@ -15,7 +15,8 @@
 	var appVersionShareData = []; 
 	var appHoursPerDay 		= [];
 	var errorsDistribution 	= [];
-	var ordersStat       = [];
+	var ordersStat          = [];
+	var hardwareOverallInfo = {};
 
 	// ------------------------------------------------------------------------------
 
@@ -140,6 +141,90 @@
 		});
 		// ----- 
 
+
+		//query OS distribution
+		var hardwareInfo = $.ajax( {
+			type: "GET", 
+			url: window.location.href + "/getHardwareOverallInfo",	
+			data : dateRange
+
+		});
+
+		hardwareInfo.done(function(jsonData) {
+
+		
+			var length = jsonData.length;
+
+			var osCollector = {}; 
+			var procCollector = {}; 
+			var countriesCollector = {}; 
+			var architectureCollector = {}; 
+			for(var i=0; i<length;i++) {
+				var j = jsonData[i];
+				
+				//collect OSes 
+				if(!osCollector[j.OS]) 
+					osCollector[j.OS] = 0; 				
+				osCollector[j.OS] ++;
+
+
+				//collect Processors 
+				if(!procCollector[j.Processor])
+					procCollector[j.Processor] = 0; 
+				procCollector[j.Processor] ++; 
+
+				//collect languages 
+				if(!countriesCollector[j.Country])
+					countriesCollector[j.Country] = 0; 
+				countriesCollector[j.Country] ++; 
+
+			    //collect architecture 
+				if(!architectureCollector[j.Architecture])
+					architectureCollector[j.Architecture] = 0; 
+				architectureCollector[j.Architecture] ++; 
+			}
+
+			hardwareOverallInfo = {}; 
+			
+			//construct OS info 
+			hardwareOverallInfo.osDistr = []; 
+			for(var prop  in osCollector) {
+				hardwareOverallInfo.osDistr.push({label:prop, value: osCollector[prop]});
+			}
+
+			//construct processor info 
+			hardwareOverallInfo.procDistr = []; 
+			for(var prop  in procCollector) {
+				hardwareOverallInfo.procDistr.push({label:prop, value: procCollector[prop]});
+			}
+
+			//construct language info 
+			hardwareOverallInfo.countriesDistr = []; 
+			for(var prop  in countriesCollector) {
+				hardwareOverallInfo.countriesDistr.push({label:prop, value: countriesCollector[prop]});
+			}
+
+
+			//construct architecture info 
+			hardwareOverallInfo.archDistr = []; 
+			for(var prop  in architectureCollector) {
+				hardwareOverallInfo.archDistr.push({label:prop, value: architectureCollector[prop]});
+			}
+
+
+			chartBinder.bindDataToChart("donut", "osesPieChart", hardwareOverallInfo.osDistr);
+			chartBinder.bindDataToChart("donut", "processorsPieChart", hardwareOverallInfo.procDistr);
+			chartBinder.bindDataToChart("donut", "countriesPieChart", hardwareOverallInfo.countriesDistr);
+			chartBinder.bindDataToChart("donut", "archPieChart", hardwareOverallInfo.archDistr);
+		});
+
+		hardwareInfo.fail(function(err) {
+			console.log(err);
+		});
+		// ----- 
+
+
+		
 		
 	}
 	
@@ -169,7 +254,18 @@
 
 	            $("#ordersStatPieChart").empty();  		
 	            chartBinder.bindDataToChart("donut", "ordersStatPieChart", ordersStat)
-	            
+
+   				$("#osesPieChart").empty();  		            
+				chartBinder.bindDataToChart("donut", "osesPieChart", hardwareOverallInfo.osDistr);
+
+				$("#processorsPieChart").empty();  		            
+				chartBinder.bindDataToChart("donut", "processorsPieChart", hardwareOverallInfo.procDistr);
+
+				$("#countriesPieChart").empty();  		            
+				chartBinder.bindDataToChart("donut", "countriesPieChart", hardwareOverallInfo.countriesDistr);
+
+				$("#archPieChart").empty();  		            
+				chartBinder.bindDataToChart("donut", "archPieChart", hardwareOverallInfo.archDistr);
 
 	        }, 250);
 	    });

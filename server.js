@@ -85,10 +85,18 @@ app.get('/dashboard/getErrorsDistributionInPeriod', function(req, res){
 });
 
 
+app.get('/dashboard/getHardwareOverallInfo', function(req, res){     
+   console.log("DASHBOARD/GET HARDWARE OVERALL INFO");
+   webProcessor.getHardwareOverallInfo(req,res);  
+});
+
+
+
 app.get('/dashboard/getOrdersStat', function(req, res){     
    console.log("DASHBOARD/ORDERS STAT");
    webProcessor.getOrdersStat(req,res);  
 });
+
 
 
 app.get('/userstat/getUserInfo', function(req, res){     

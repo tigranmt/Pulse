@@ -1046,6 +1046,7 @@ function getUserInfo(params) {
 			}
 			else {			
 				params.done(rows); 
+
 			}
 		}
 
@@ -1057,28 +1058,26 @@ function getUserInfo(params) {
 /* var params ={
       startDate : startDate, //start date 
       endDate   : endDate,   //end date     
-      done : done,           //done callback 
+      client    : clientID, 
+      done : done,           //done callback       
       err: err               //error callback
  };*/
-function getOSDistribution(params) {
+function getHardwareOverallInfo(params) {
 
 	var start 	 =  getConnection().escape(params.startDate); 
-    var end   	 =  getConnection().escape(params.endDate); 
-    var client   =  getConnection().escape(params.clientID); 
+    var end   	 =  getConnection().escape(params.endDate);    
 
-	var querySelect = "SELECT " + clientsTableName + ".ClientID, " + hardwareTableName + ".HardwareID, " + hardwareTableName + ".RegistrationDate, " + hardwareTableName + ".RegistrationHour, " + hardwareTableName + ".AppVersion, " + 
-					    +  hardwareTableName + ".OS, " + hardwareTableName + ".Processor, " + hardwareTableName + ".Country FROM " + clientsTableName + " INNER JOIN " + hardwareTableName + " ON " + clientsTableName + ".HardwareID = " + hardwareTableName + ".HardwareID " + 
-					   " WHERE ClientID = " + client   + 
-					   " AND STR_TO_DATE(" + hardwareTableName + ".RegistrationDate,'%d/%m/%Y') > STR_TO_DATE(" + start +  ",'%d/%m/%Y') " + 
-					   " AND STR_TO_DATE(" + hardwareTableName + ".RegistrationDate,'%d/%m/%Y') < STR_TO_DATE(" + end + ",'%d/%m/%Y') " + 
-					   " ORDER BY STR_TO_DATE(" + hardwareTableName + ".RegistrationDate,'%d/%m/%Y'), " + hardwareTableName + ".HardwareID";
+	var querySelect = "SELECT " + hardwareTableName + ".OS, " + hardwareTableName + ".Processor, " + hardwareTableName + ".Architecture, " + hardwareTableName + ".Country FROM " + hardwareTableName
+						" WHERE STR_TO_DATE(Hardwares.RegistrationDate,'%d/%m/%Y') > STR_TO_DATE(" + start +",'%d/%m/%Y') " +  
+						" AND STR_TO_DATE(Hardwares.RegistrationDate,'%d/%m/%Y') < STR_TO_DATE(" + end + ",'%d/%m/%Y')"; 
 
+	
 	console.log(querySelect);
 	
 	getConnection().query(querySelect, function(er, rows) { 
 
 		if(er) {
-	 			console.log( "Error on getOSDistribution query: " + er);
+	 			console.log( "Error on getHardwareInfo query: " + er);
 	 			params.err(er);	    
 	    }
 	    else {
@@ -1109,4 +1108,5 @@ exports.getErrorLogInPeriod 				= getErrorLogInPeriod;
 exports.getOrdersStat 						= getOrdersStat;
 exports.getUserInfo							= getUserInfo;
 exports.saveLicense							= saveLicense;
+exports.getHardwareOverallInfo              = getHardwareOverallInfo;
 

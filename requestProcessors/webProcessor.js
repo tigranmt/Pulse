@@ -534,6 +534,36 @@ function getUserInfo(req, res)
 }
 
 
+function getHardwareOverallInfo(req, res) {
+   var url_parts = url.parse(req.url, true);
+   var query = url_parts.query;
+
+   var startDate = toDbFormattedDate(query.startDate); 
+   var endDate = toDbFormattedDate(query.endDate);
+ 
+   var done = function(data) {
+      var jsonData = JSON.stringify(data); 
+      console.log("Errors distribution: " + jsonData);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(jsonData);
+   }
+
+   var err = function(err) {
+      res.writeHead(500, err.message);
+   }
+
+   var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date      
+      done : done,           //done callback 
+      err: err             //error callback
+   };
+   
+   console.log("GET HARDWARE OVERALL INFO");
+   db.getHardwareOverallInfo(params);
+}
+
+
 
 
 exports.welcome 	                              = welcome; 
@@ -552,3 +582,4 @@ exports.getErrorLogInPeriod                     = getErrorLogInPeriod;
 exports.getOrdersStat                           = getOrdersStat;
 exports.getOrderStatByUser                      = getOrderStatByUser;
 exports.getUserInfo                             = getUserInfo;
+exports.getHardwareOverallInfo                  = getHardwareOverallInfo;
