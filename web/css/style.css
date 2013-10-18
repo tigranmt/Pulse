@@ -46,6 +46,17 @@
 	cursor: pointer;
 }
 
+.workingtab {
+	color :#CC5B0F;
+}
+
+.workingtab_logo {
+	font-size: 2.2em;
+	position: absolute;
+	left: 100px;
+	color :#CC5B0F;
+}
+
 #userinfo {
 	margin-left: 10px;
 }
