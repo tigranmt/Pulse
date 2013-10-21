@@ -47,7 +47,7 @@
 		}
 
 
-		$('#errorDetails').modal('show')
+		$('#errorDetails').modal('show');
 			
 	}
 
