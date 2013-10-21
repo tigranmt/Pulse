@@ -37,7 +37,7 @@
 	        						"<button type='button' class='btn btn-success pull-right' data-dismiss='modal'>Close</button>"+
 	        						"<h4 class='modal-title'>" + title + "</h4>" + 
 	      						"</div>" + 
-	      						"<div class='modal-body'>" + 
+	      						"<div class='modal-body' style='overflow: scroll;'>" + 
 	        						"<p>" + message + "</p>" + 
 	      						"</div>" +       						
 	    					"</div>"+
