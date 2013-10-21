@@ -25,6 +25,10 @@ var chartBinder = {
 
 				  data: data
 				});
+
+				if( data.getTotalInfo) {
+					$("#" + elemementName).append("<div class='total-info'>	<span class='glyphicon glyphicon-star'></span>  <span class='badge'>" + data.getTotalInfo() +"</span> </div>");
+				}
 			}
 			else if(chartType === "bar") {
 

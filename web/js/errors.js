@@ -20,6 +20,38 @@
 
 
 
+	var showModal = function(title, message) {
+		title = title || ""; 
+		message = message || ""; 
+
+       	if(title === "" || message === "")
+       		return; 		
+
+		
+		if($('#errorDetails').length === 0) {
+
+			$(document.body).append("<div id='errorDetails' class='modal fade'> " + 
+	  					 "<div class='modal-dialog'>" + 
+	    					"<div class='modal-content'>" + 
+	      						"<div class='modal-header'>" + 
+	        						"<button type='button' class='btn btn-success pull-right' data-dismiss='modal'>Close</button>"+
+	        						"<h4 class='modal-title'>" + title + "</h4>" + 
+	      						"</div>" + 
+	      						"<div class='modal-body'>" + 
+	        						"<p>" + message + "</p>" + 
+	      						"</div>" +       						
+	    					"</div>"+
+	 					 "</div>" + 
+						"</div>");
+
+		}
+
+
+		$('#errorDetails').modal('show')
+			
+	}
+
+
 	var  getErrorDistributionInPeriodByType = function() {
 		
 		var start = $(".startDate").val(); 
@@ -72,11 +104,18 @@
 
 			//construct pie chart data 
 			var pieChartData = []; 
+			var totErrors = 0; 
 			for(var prop in collectorByVersion) {
 			    if(collectorByVersion.hasOwnProperty(prop)) {
 			        pieChartData.push({label: prop, value: collectorByVersion[prop]});
+			        totErrors += collectorByVersion[prop];
 			    }
 			}
+
+			pieChartData.totErrors = totErrors; 
+	    	pieChartData.getTotalInfo = function() {
+	        	return "Total Errors count: " + this.totErrors;
+	        }
 			errorsData.pieChartData = pieChartData; 
 			//----------
 
@@ -165,14 +204,9 @@
 				errorDetailPopover.popover('hide');
 			}
 
-			var options = {				
-				container : "body",
-				title : "Error details", 
-				content : errorData.ErrorValue
-			}
-			
-			errorDetailPopover = $(event.target).popover(options);
-			errorDetailPopover.popover('show');
+			var title = "Error on: " + errorData.RegistrationDate + " " + errorData.RegistrationHour + "  Client: " + errorData.ClientID;
+
+			showModal(title , errorData.ErrorValue);
 			
 		}
 
@@ -260,5 +294,7 @@
 		getErrorDistributionInPeriodByType();
 		loadErrorLog();
 	});
+
+
 
 })();

@@ -23,9 +23,13 @@
 <body>
 
 
-	<nav class="navbar navbar-default  navbar-fixed-top" role="navigation">
+ 	 <div class="gridbody">
+	 	<img src="web/images/image01.jpg" alt="">
+	 </div>
+   
+	<nav class="navbar navbar-default" role="navigation">
 		  <!-- Brand and toggle get grouped for better mobile display -->
-		  <div class="navbar-header">
+		  <div class="navbar-header" style="background-color: #f8f8f8;">
 		    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
 		      <span class="sr-only">Toggle navigation</span>
 		      <span class="icon-bar"></span>
@@ -70,12 +74,10 @@
 	</nav>
 
 
-
-
-	<div class="container-fluid" id="introheader">
+	<div class="container" id="introheader">
 		
-		<div class="row-fluid">
-			 <div id="userinfo" class="span5">
+		<div class="row">
+			 <div id="userinfo" class="chart sized col-md-4">
 				<h3>User info</h3>
 				<ul class=" list-group">
 				
@@ -107,7 +109,7 @@
 				</ul>
 
 			</div>
-			<div class="chart span5">
+			<div class=" chart sized col-md-4">
 				<h3>
 					Orders by user
 				</h3>
@@ -117,8 +119,9 @@
 				</div>			
 				
 			</div>
-
-		    <div class="chart span5">
+		</div>
+		<div class="row">
+		    <div class="chart sized col-md-4">
 				<h3>
 					Errors from user
 				</h3>
@@ -128,7 +131,7 @@
 				
 			</div>
 			
-			<div class="chart span5">
+			<div class="chart sized col-md-4">
 				<h3>
 					Hours spent
 				</h3>
@@ -139,7 +142,7 @@
 				
 			</div>
 
-			<div class="chart span5">
+			<div class="chart sized col-md-4">
 				<h3>
 					Hardware history
 				</h3>
@@ -149,9 +152,13 @@
 				</div>			
 				
 			</div>
-		
+
+		</div>
 		</div>
 	</div>
+
+
+
 
 </body>
 

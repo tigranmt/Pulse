@@ -14,9 +14,11 @@
 
 </head>
 
-<body>
+<body >
 
-	
+	 <div class="gridbody">
+	 	<img src="web/images/image01.jpg" alt="">
+	 </div>
 
 	<nav class="navbar navbar-default" role="navigation">
 		  <!-- Brand and toggle get grouped for better mobile display -->
@@ -54,7 +56,7 @@
 		  		  <li id="errorspage" >
 			  		<a  href="errors"><span class="glyphicon glyphicon-fire"></span> Errors</a>
 			  	  </li>	 
-			  	   
+
 				 
 				   <li id="actionspage">
 				  	 <a href="actions"><span class="glyphicon glyphicon-random"></span> Actions</a>
@@ -63,19 +65,20 @@
 		  </div><!-- /.navbar-collapse -->
 	</nav>
 
-	<div class="container-fluid" id="introheader">
+	<div class="container" id="introheader">
 		
-		<div class="row-fluid">
-			<div class="chart span5">
+		<div class="row">
+			<div class="chart sized col-md-4">
 				<h3>
 					Versions usage share
 				</h3>
 				
-				<div id="versionsSharePie" >				
+				<div id="versionsSharePie" >		
+					
 				</div>				
 				
 			</div>
-			<div class="chart span5">
+			<div class="chart sized col-md-4">
 				<h3>
 					Hours per day
 				</h3>
@@ -85,7 +88,7 @@
 				
 				
 			</div>
-			<div class="chart span5">
+			<div class="chart sized col-md-4">
 				<h3>
 					Errors
 				</h3>
@@ -94,7 +97,7 @@
 				</div>		
 				
 			</div>
-			<div class="chart span5">
+			<div class="chart sized col-md-4">
 				<h3>
 					Orders made
 				</h3>
@@ -103,7 +106,12 @@
 				</div>
 			
 			</div>
-			<div class="chart span5">
+		
+		</div>
+		<div class="row">
+			
+			
+			<div class="chart sized col-md-4">
 				<h3>
 					OS used
 				</h3>
@@ -113,7 +121,7 @@
 			
 			</div>
 
-			<div class="chart span5">
+			<div class="chart sized col-md-4">
 				<h3>
 					Processors used
 				</h3>
@@ -122,29 +130,28 @@
 				</div>
 			
 			</div>
-
-
-			<div class="chart span5">
+			<div class="chart sized col-md-6">
 				<h3>
-					Countries
+					OS Languages
 				</h3>
 			
-				<div id="countriesPieChart" >				  
-				</div>
-			
+				<div id="osLanguagesPieChart" >				  
+				</div>			
 			</div>
 
-
-
-			<div class="chart span5">
+			<div class="chart sized col-md-6">
 				<h3>
 					Architectures
-				</h3>
-			
+				</h3>			
+
 				<div id="archPieChart" >				  
 				</div>
 			
 			</div>
+		
+		</div>
+	
+		
 		</div>
 	</div>
 

@@ -43,10 +43,17 @@
 
 	        appVersionShareData = [];
 
+	        var totalUsed = 0; 
 	        for(var d=0; d<jsonData.length;d++) {
 	        	var appVersion = jsonData[d].AppVersion; 
 	        	var usedCount = jsonData[d].UsedCount; 
 	        	appVersionShareData.push({label: appVersion, value: usedCount});
+	        	totalUsed += usedCount; 
+	        }
+
+	        appVersionShareData.totalUsed = totalUsed; 
+	        appVersionShareData.getTotalInfo = function() {
+	        	return "Total used count: " + this.totalUsed;
 	        }
 
 			chartBinder.bindDataToChart("donut", "versionsSharePie", appVersionShareData);
@@ -100,11 +107,19 @@
 
 			errorsDistribution = []; 
 			var length = jsonData.length;
+			var totalErrors = 0; 
 			for(var i=0; i<length;i++) {
 				var j = jsonData[i];
 			
 				errorsDistribution.push({label:j.ErrorTitle, value: j.Count});
+			    totalErrors += j.Count; 
 			}
+
+		
+			errorsDistribution.totalErrors = totalErrors; 
+	        errorsDistribution.getTotalInfo = function() {
+	        	return "Total erros count: " + this.totalErrors;
+	        }
 
 			chartBinder.bindDataToChart("donut", "errorsPieChart", errorsDistribution)
 		});
@@ -127,11 +142,19 @@
 
 			ordersStat = []; 
 			var length = jsonData.length;
+			var totalOrders = 0; 
 			for(var i=0; i<length;i++) {
 				var j = jsonData[i];
 			
 				ordersStat.push({label:j.ActionName, value: j.Count});
+				totalOrders+= j.Count;
 			}
+
+
+			ordersStat.totalOrders = totalOrders; 
+	        ordersStat.getTotalInfo = function() {
+	        	return "Total orders count: " + this.totalOrders;
+	        }
 
 			chartBinder.bindDataToChart("donut", "ordersStatPieChart", ordersStat)
 		});
@@ -186,23 +209,44 @@
 
 			hardwareOverallInfo = {}; 
 			
-			//construct OS info 
+			//construct OS info 			
 			hardwareOverallInfo.osDistr = []; 
 			for(var prop  in osCollector) {
-				hardwareOverallInfo.osDistr.push({label:prop, value: osCollector[prop]});
+				hardwareOverallInfo.osDistr.push({label:prop, value: osCollector[prop]});				
 			}
+			
+			hardwareOverallInfo.osDistr.totalOs = hardwareOverallInfo.osDistr.length; 
+	        hardwareOverallInfo.osDistr.getTotalInfo = function() {
+	        	return "Total OS count: " + this.totalOs;
+	        }
+
+			// ------- 
+
 
 			//construct processor info 
+			
 			hardwareOverallInfo.procDistr = []; 
 			for(var prop  in procCollector) {
 				hardwareOverallInfo.procDistr.push({label:prop, value: procCollector[prop]});
+				
 			}
+			hardwareOverallInfo.procDistr.totProc = hardwareOverallInfo.procDistr.length; 
+	        hardwareOverallInfo.procDistr.getTotalInfo = function() {
+	        	return "Total Processors count: " + this.totProc;
+	        }
+			// ---------------
 
 			//construct language info 
+		
 			hardwareOverallInfo.countriesDistr = []; 
 			for(var prop  in countriesCollector) {
 				hardwareOverallInfo.countriesDistr.push({label:prop, value: countriesCollector[prop]});
 			}
+			hardwareOverallInfo.countriesDistr.totLanguages = hardwareOverallInfo.countriesDistr.length; 
+	        hardwareOverallInfo.countriesDistr.getTotalInfo = function() {
+	        	return "Total Languages used: " + this.totLanguages;
+	        }
+			// ----------------------
 
 
 			//construct architecture info 
@@ -210,11 +254,16 @@
 			for(var prop  in architectureCollector) {
 				hardwareOverallInfo.archDistr.push({label:prop, value: architectureCollector[prop]});
 			}
+			hardwareOverallInfo.archDistr.totArchitecture = hardwareOverallInfo.archDistr.length; 
+	        hardwareOverallInfo.archDistr.getTotalInfo = function() {
+	        	return "Total Architectures used: " + this.totArchitecture;
+	        }
+			// ------------------------
 
 
 			chartBinder.bindDataToChart("donut", "osesPieChart", hardwareOverallInfo.osDistr);
 			chartBinder.bindDataToChart("donut", "processorsPieChart", hardwareOverallInfo.procDistr);
-			chartBinder.bindDataToChart("donut", "countriesPieChart", hardwareOverallInfo.countriesDistr);
+			chartBinder.bindDataToChart("donut", "osLanguagesPieChart", hardwareOverallInfo.countriesDistr);
 			chartBinder.bindDataToChart("donut", "archPieChart", hardwareOverallInfo.archDistr);
 		});
 
@@ -261,8 +310,8 @@
 				$("#processorsPieChart").empty();  		            
 				chartBinder.bindDataToChart("donut", "processorsPieChart", hardwareOverallInfo.procDistr);
 
-				$("#countriesPieChart").empty();  		            
-				chartBinder.bindDataToChart("donut", "countriesPieChart", hardwareOverallInfo.countriesDistr);
+				$("#osLanguagesPieChart").empty();  		            
+				chartBinder.bindDataToChart("donut", "osLanguagesPieChart", hardwareOverallInfo.countriesDistr);
 
 				$("#archPieChart").empty();  		            
 				chartBinder.bindDataToChart("donut", "archPieChart", hardwareOverallInfo.archDistr);

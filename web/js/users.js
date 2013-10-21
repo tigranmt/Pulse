@@ -140,23 +140,29 @@
 
     var getOrderStatByUser = function(queryData) {		
 
-        var oStat = $.ajax( {
+        var oStat = $.ajax({
 			type: "GET", 
 			url: window.location.href + "/getOrderStatByUser",	
 			data : queryData
-
 		});
 
 		oStat.done(function(jsonData) {
 
 			ordersStat = []; 
+			var totOrders = 0; 
 			var length = jsonData.length;
 			for(var i=0; i<length;i++) {
 				var j = jsonData[i];
 			
 				ordersStat.push({label:j.ActionName, value: j.Count});
+				totOrders += j.Count;
+
 			}
 
+			ordersStat.totOrders = totOrders; 
+	    	ordersStat.getTotalInfo = function() {
+	        	return "Total Orders count: " + this.totOrders;
+	        }
 			chartBinder.bindDataToChart("donut", "ordersStatByUser", ordersStat)
 		});
 
@@ -178,11 +184,19 @@
 		errorsDistr.done(function(jsonData) {
 
 			errorsDistribution = []; 
+			var totErrCount = 0; 
 			var length = jsonData.length;
 			for(var i=0; i<length;i++) {
 				var j = jsonData[i];
 			
 				errorsDistribution.push({label:j.ErrorTitle, value: j.Count});
+				totErrCount += j.Count;
+			}
+
+
+			errorsDistribution.totErrCount =totErrCount;
+			errorsDistribution.getTotalInfo = function() {
+				return "Total Errors found: " + this.totErrCount;
 			}
 
 			chartBinder.bindDataToChart("donut", "errorStatByUser", errorsDistribution)
