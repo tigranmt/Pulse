@@ -25,7 +25,7 @@
 
 .sized {
 	min-width: 200px;
-	max-width: 445px;
+	/*max-width: 445px;*/
 	min-height: 445px;
 }
 
