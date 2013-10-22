@@ -1096,6 +1096,89 @@ function getHardwareOverallInfo(params) {
 
 
 
+/* var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date     
+      client    : clientID, 
+      maxID     : maxID, 	  //return only IDs bigger then specified, or -1 for all
+      done : done,           //done callback       
+      err: err               //error callback
+ };*/
+function  getActionsLog(params) {
+	var client = " ";
+	var aggregator = " WHERE ";
+    if(params.clientID) {
+    	client = params.clientID;
+    	if(client.trim() !== "") {
+
+    		client = aggregator + logActionsTableName + ".ClientID=" + getConnection().escape(client);
+    		aggregator = " AND "; 
+    	}
+    	else {
+    		client = " ";
+    	}
+    }
+
+    var start = " "; 
+    if(params.startDate) {
+    	start = params.startDate;
+    	if(start && start.trim() !== "") {
+
+    	    console.log("START is: " + start);
+    		start = aggregator + "STR_TO_DATE(" + logActionsTableName +".RegistrationDate,'%d/%m/%Y') > STR_TO_DATE(" + getConnection().escape(start) +",'%d/%m/%Y') "
+    		aggregator = " AND "; 
+    	}
+    	else {
+    		start = " ";
+    	}
+    }
+
+    var end = " "; 
+    if(params.endDate) {
+    	end = params.endDate;
+    	if(end && end.trim() !== "") {
+    		end = aggregator + "STR_TO_DATE(" + logActionsTableName +".RegistrationDate,'%d/%m/%Y') < STR_TO_DATE(" + getConnection().escape(end) +",'%d/%m/%Y') "
+    		aggregator = " AND "; 
+    	}
+    	else {
+    		end = " ";
+    	}
+    }
+
+
+    var maxID = (!params.MaxID || params.MaxID < 0)? " " : aggregator + logActionsTableName + ".ID>" + getConnection().escape(params.MaxID);
+   
+
+    var querySelect = "Select " + logActionsTableName + ".ClientID, " + logActionsTableName + ".RegistrationDate, " +  logActionsTableName + ".RegistrationHour, "  + logActionsTableName + ".AppVersion, " + logActionsTableName + ".ActionValue, " + logActionsTableName + ".ID, " + actionsTableName + ".Action " + 
+						" from " + logActionsTableName + " Inner Join " + actionsTableName + " on " + logActionsTableName + ".Action = " + actionsTableName +  ".ID " + 
+						client + start + end + maxID + 
+						"ORDER BY " + logActionsTableName + ".RegistrationDate DESC LIMIT 100";
+
+	console.log(querySelect);
+
+	getConnection().query(querySelect, function(er, rows) { 
+
+		if(er) {
+	 			console.log( "Error on getActionsLog query: " + er);
+	 			params.err(er);	    
+	    }
+	    else {
+			if(!rows || rows.length === 0) {
+				console.log("empty data"); 
+				params.done([]);
+			}
+			else {			
+				params.done(rows); 
+			}
+		}
+
+    });
+
+
+}
+
+
+
 exports.saveStartData    					= saveStartData;
 exports.saveStopData     					= saveStopData;
 exports.saveActionData   					= saveActionData;
@@ -1109,4 +1192,5 @@ exports.getOrdersStat 						= getOrdersStat;
 exports.getUserInfo							= getUserInfo;
 exports.saveLicense							= saveLicense;
 exports.getHardwareOverallInfo              = getHardwareOverallInfo;
+exports.getActionsLog 						= getActionsLog;
 

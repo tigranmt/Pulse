@@ -67,6 +67,7 @@ app.get('/dashboard', function(req, res){
    webProcessor.dashboard(req,res);  
 });
 
+
 app.get('/dashboard/getAppVersionsDistribution', function(req, res){     
    console.log("DASHBOARD/APPVERSION DISTRIBUTION");
    webProcessor.getAppVersionsDistribution(req,res);  
@@ -134,6 +135,11 @@ app.get('/errors/getErrorLogInPeriod', function(req, res){
 });
 
 
+
+app.get('/actions/getActionsLog', function(req, res){     
+   console.log("GET ACTIONS LOG");
+   webProcessor.getActionsLog(req,res);  
+});
 
 
 

@@ -73,13 +73,50 @@
 	</nav>
 
 
+	<div class="container" id="introheader">
+		
+	
+		<div class="row">
+			<div class="chart col-md-12">
+				<h3>
+					 Actions executed in real time
+				</h3>
+				<div id="actionsLog" class="table-responsive">
+				  <table class="table table-hover table-striped table-condensed">
+				  	<thead>
+				  		<tr>
+				  			<th>Client</th>
+				  			<th>Date</th>
+				  			<th>Hour</th>
+				  			<th>Action</th>
+				  			<th>Value</th>
+				  		</tr>
+				  	</thead>
+				     <tbody data-bind="foreach: actionsList">
+				        <tr class="actionData">
+				            <td data-bind="text: ClientID"></td>
+				            <td data-bind="text: RegistrationDate"></td>
+				            <td data-bind="text: RegistrationHour"></td>
+				            <td data-bind="text: AppVersion"></td>
+				            <td data-bind="text: Action"></td>
+				            <td data-bind="text: ActionValue"></td>
+				        </tr>
+	    			 </tbody>
+				  </table>
+				</div>
+			</div>
+		</div>  
+		
+		</div>
 
 </body>
 
 
 <script type="text/javascript" src="web/js/jquery.min.js"></script>
 <script type="text/javascript" src="web/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="web/js/raphael-2.1.0.min.js"></script>
-<script type="text/javascript" src="web/js/morris.min.js"></script>
+<!--<script type="text/javascript" src="web/js/raphael-2.1.0.min.js"></script>
+<script type="text/javascript" src="web/js/morris.min.js"></script>-->
+
+<script type="text/javascript" src="web/js/knockout-2.3.0.js"></script>
 <script type="text/javascript" src="web/js/actions.js"></script>
 </html>

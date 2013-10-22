@@ -115,9 +115,14 @@ function process(req, res) {
 
 
 function toDbFormattedDate(date) {
+  
+  if(!date)
+    return ""; 
+
    var splits = date.split("-"); 
    return splits[2] + "/" + splits[1] + "/" + splits[0];
 }
+
 
 
 function getAppVersionsDistribution(req, res) {
@@ -564,6 +569,40 @@ function getHardwareOverallInfo(req, res) {
 }
 
 
+function getActionsLog(req, res) {
+   var url_parts = url.parse(req.url, true);
+   var query = url_parts.query;
+
+   var startDate = toDbFormattedDate(query.startDate); 
+   var endDate = toDbFormattedDate(query.endDate);
+   var clientID = query.clientID;
+   var maxID = query.maxID;
+ 
+   var done = function(data) {
+      var jsonData = JSON.stringify(data); 
+      console.log("GetActionsLog: " + jsonData);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(jsonData);
+   }
+
+   var err = function(err) {
+      res.writeHead(500, err.message);
+   }
+
+   var params ={
+      startDate : startDate, //start date 
+      endDate   : endDate,   //end date
+      clientID  : clientID, 
+      maxID     : maxID,     
+      done : done,           //done callback 
+      err: err             //error callback
+   };
+   
+   console.log("GET ACTION LOG");
+   db.getActionsLog(params);
+}
+
+
 
 
 exports.welcome 	                              = welcome; 
@@ -583,3 +622,4 @@ exports.getOrdersStat                           = getOrdersStat;
 exports.getOrderStatByUser                      = getOrderStatByUser;
 exports.getUserInfo                             = getUserInfo;
 exports.getHardwareOverallInfo                  = getHardwareOverallInfo;
+exports.getActionsLog                           = getActionsLog;
