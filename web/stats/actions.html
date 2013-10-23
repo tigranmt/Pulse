@@ -88,12 +88,13 @@
 				  			<th>Client</th>
 				  			<th>Date</th>
 				  			<th>Hour</th>
+				  			<th>App Version</th>
 				  			<th>Action</th>
 				  			<th>Value</th>
 				  		</tr>
 				  	</thead>
 				     <tbody data-bind="foreach: actionsList">
-				        <tr class="actionData">
+				        <tr data-bind="css: RecordState">
 				            <td data-bind="text: ClientID"></td>
 				            <td data-bind="text: RegistrationDate"></td>
 				            <td data-bind="text: RegistrationHour"></td>
@@ -117,6 +118,15 @@
 <!--<script type="text/javascript" src="web/js/raphael-2.1.0.min.js"></script>
 <script type="text/javascript" src="web/js/morris.min.js"></script>-->
 
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="web/js/html5shiv.js"></script>
+      <script src="web/js/respond.min.js"></script>
+<![endif]-->
+
 <script type="text/javascript" src="web/js/knockout-2.3.0.js"></script>
+<script type="text/javascript" src="web/js/socket.io.min.js"></script>
 <script type="text/javascript" src="web/js/actions.js"></script>
+
+
 </html>

@@ -1,9 +1,12 @@
 var pulseProcessor = require("./requestProcessors/pulseProcessor");      //create pulse Processor
 var webProcessor   = require("./requestProcessors/webProcessor");        //create web Processor
 var express        = require("express");
+var app            = express();  
+var http           = require("http");
+var server         = http.createServer(app);
+var io             = require('socket.io').listen(server); //socket IO
 
-
-var app= express();  
+var actionsAdded = []; 
 
 var port = process.env.PORT || 3100;
 
@@ -24,6 +27,7 @@ var processPulseRequest = function(req, res, callback) {
     });
 };
 
+
 app.post('/pulse/start', function(req, res){    
      console.log("Start pulse....");
      processPulseRequest(req, res, pulseProcessor.startData); 
@@ -38,7 +42,19 @@ app.post('/pulse/stop', function(req, res){
 
 
 app.post('/pulse/action', function(req, res){    
-    processPulseRequest(req, res, pulseProcessor.actionData);  
+    
+    processPulseRequest(req, res, function(data) {
+      
+
+      console.log("ACTION data: " + data);
+      //process server
+      var packet = pulseProcessor.actionData(data);
+
+      //add to array new data
+      actionsAdded.push(packet);
+
+    });   
+    
 });
 
 app.post('/pulse/error', function(req, res){    
@@ -170,8 +186,34 @@ app.use(function(err, req, res, next){
   console.error(err.stack); 
 });
 
-console.log("Start listening on port " + port);
-app.listen(port, process.env.IP);
 
+
+
+/*Web socket management*/
+io.sockets.on('connection', function (socket) {
+
+  console.log("Connected to client ...");
+  var actions = setInterval(function () {
+   
+      if(actionsAdded.length >0 ) {
+        var data = actionsAdded.shift();
+
+        console.log("Web Socket call: " + data);
+
+        socket.volatile.emit('new_action', data);
+      }
+   
+  }, 1000);
+
+  socket.on('disconnect', function () {
+    clearInterval(actions);
+  });
+});
+//********************
+
+
+//start server
+console.log("Start listening on port " + port);
+server.listen(port, process.env.IP);
 
 exports._express  = express;

@@ -1106,6 +1106,7 @@ function getHardwareOverallInfo(params) {
  };*/
 function  getActionsLog(params) {
 	var client = " ";
+	var rowLimit = 100;
 	var aggregator = " WHERE ";
     if(params.clientID) {
     	client = params.clientID;
@@ -1145,14 +1146,14 @@ function  getActionsLog(params) {
     	}
     }
 
-
-    var maxID = (!params.MaxID || params.MaxID < 0)? " " : aggregator + logActionsTableName + ".ID>" + getConnection().escape(params.MaxID);
+    console.log("MAX ID: " + params.maxID);
+    var maxIDQuery = (!params.maxID || params.maxID < 0)? " " : aggregator + logActionsTableName + ".ID>" + getConnection().escape(params.maxID);
    
 
     var querySelect = "Select " + logActionsTableName + ".ClientID, " + logActionsTableName + ".RegistrationDate, " +  logActionsTableName + ".RegistrationHour, "  + logActionsTableName + ".AppVersion, " + logActionsTableName + ".ActionValue, " + logActionsTableName + ".ID, " + actionsTableName + ".Action " + 
 						" from " + logActionsTableName + " Inner Join " + actionsTableName + " on " + logActionsTableName + ".Action = " + actionsTableName +  ".ID " + 
-						client + start + end + maxID + 
-						"ORDER BY " + logActionsTableName + ".RegistrationDate DESC LIMIT 100";
+						client + start + end + maxIDQuery + 
+						" ORDER BY " + logActionsTableName + ".ID DESC LIMIT " + rowLimit;
 
 	console.log(querySelect);
 

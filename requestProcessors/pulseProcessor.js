@@ -116,6 +116,8 @@ function processActionData(actionString) {
             return false;
 
         db.saveActionData(packet);
+
+        return packet;
 };
 
 

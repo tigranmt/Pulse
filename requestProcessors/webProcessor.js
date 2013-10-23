@@ -1,8 +1,9 @@
 
 var fs   = require("fs"); 
 var path = require('path');
-var url = require('url');
-var db = require("../database/database_mysql"); 
+var url  = require('url');
+var db   = require("../database/database_mysql"); 
+
 
 
 function loadHtmlPage(req, res, pageName) {
@@ -46,13 +47,14 @@ function processResources(res, res, filename, mimeType) {
 
  	var localPath = __dirname;
 	//move to upper level (..) and got to the requested file
-    localPath = path.join(localPath, "..", filename);
+
+    localPath = path.join(localPath, "..", filename);  
 
     fs.exists(localPath, function(exists) {
-      if(exists) {
-        
+      if(exists) 
+      {        
 
-          //read the file requested JS, CSS, image
+          //read the file requested JS, CSS, Image
           fs.readFile(localPath, function(err, contents) {
                 if(!err) {
                     res.setHeader("Content-Length", contents.length);
@@ -578,6 +580,8 @@ function getActionsLog(req, res) {
    var clientID = query.clientID;
    var maxID = query.maxID;
  
+
+  
    var done = function(data) {
       var jsonData = JSON.stringify(data); 
       console.log("GetActionsLog: " + jsonData);
