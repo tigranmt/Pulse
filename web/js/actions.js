@@ -135,6 +135,8 @@
 			else if(a.State() === recordState.freshRecord) {
 				a.State(recordState.oldRecord);
 			}
+			else 
+				break;
 		}
 	}
 
@@ -166,7 +168,7 @@
 	if( typeof(WebSocket) == "function" ) {
 		//there is WebSpcket support, so subscrbe to incomming event to populate UI accordingly
 		
-		  var socket = io.connect(window.location.href);
+		  var socket = io.connect(window.location.hostname);
 		  socket.on('new_action', function (newAction) {
 		       
 		       var bindValue = { 
@@ -189,6 +191,7 @@
 						return "active";
 				}, bindValue); 
 
+			   updateRowStates();
 		       data.actionsList.unshift(bindValue);		   
 		  });
 
@@ -199,6 +202,7 @@
 		//ping server for modifications
 		setInterval(function() {
 
+  			updateRowStates();
 			setData(false);
 
 		}, updateInterval); 
@@ -206,11 +210,11 @@
 
 
 
-	setInterval(function() {
+	/*setInterval(function() {
 
 		updateRowStates();
 
-	}, rowStateUpdateInterval); 
+	}, rowStateUpdateInterval); */
 
 
   	//handle update click 

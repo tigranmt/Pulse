@@ -6,12 +6,28 @@ var http           = require("http");
 var server         = http.createServer(app);
 var io             = require('socket.io').listen(server); //socket IO
 
-var actionsAdded = []; 
+
+
+//actions "stack", that will be "cleared" via WebSocket timer
+var clients = []; 
 
 var port = process.env.PORT || 3100;
 
 // Log the requests
 app.use(express.logger('dev'));
+
+
+var notifyAllClients = function(data) {
+    if(!clients || clients.length === 0) 
+      return; 
+
+    var length = clients.length; 
+
+    for(var i=0; i<length; i++) {
+        var socket = clients[i]; 
+        socket.volatile.emit("new_action", data);
+    }
+}
 
 
 /*** PULSE requests handlers *****/ 
@@ -50,8 +66,7 @@ app.post('/pulse/action', function(req, res){
       //process server
       var packet = pulseProcessor.actionData(data);
 
-      //add to array new data
-      actionsAdded.push(packet);
+      notifyAllClients(packet);
 
     });   
     
@@ -190,23 +205,23 @@ app.use(function(err, req, res, next){
 
 
 /*Web socket management*/
+var data = {};
 io.sockets.on('connection', function (socket) {
 
   console.log("Connected to client ...");
-  var actions = setInterval(function () {
-   
-      if(actionsAdded.length >0 ) {
-        var data = actionsAdded.shift();
 
-        console.log("Web Socket call: " + data);
-
-        socket.volatile.emit('new_action', data);
-      }
-   
-  }, 1000);
-
+  // save socket in clients 
+  clients.push(socket); 
+  console.log("Total cients count: " + clients.length);
+  
   socket.on('disconnect', function () {
-    clearInterval(actions);
+   
+     //remove socket from clients
+      var i = clients.indexOf(socket);
+      clients.splice(i, 1);
+
+      console.log("Disconnected from client ...");
+      console.log("Total cients count: " + clients.length);
   });
 });
 //********************
