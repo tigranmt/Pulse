@@ -1,7 +1,13 @@
+ /******
+ *
+ *  MySQL databse interface
+ *
+ */ 
+
  var mysql 	= require("mysql");
 
 
-
+ /* configuration variables */ 
  var dbName = "Pulse";
  var clientsTableName = "Clients";
  var hardwareTableName = "Hardwares";
@@ -16,7 +22,11 @@
 
 
 
-
+/*
+	Generates MySQL connection object on request. 
+	If connection is closed, new conention will be constructed based on available information
+	@method getConnection
+*/
 var getConnection = function() {
 	if (connection && connection._socket
             && connection._socket.readable
@@ -59,6 +69,7 @@ var getConnection = function() {
 	 }
 
 
+    /** Connections state change listeners*/
 	connection.connect(function(err) {
 	     if(err != null) {
 	     	console.log(err);
@@ -72,17 +83,18 @@ var getConnection = function() {
 	connection.on("error", function (err) {
 	    console.log("SQL CONNECTION ERROR: " + err);
 	});
+	/***************************************/
 
 
 	return connection;
 }
 
 
- //**********************************************************************************************************************************
- //**********************************************************************************************************************************
- // CHECK IF DATABASE EXISTS, IF NOT, CREATE IT
- //**********************************************************************************************************************************
- //**********************************************************************************************************************************
+/*
+ Constructs database from the scratch, if it does not exist. Not preferable solution, thow, as databse creation 
+ is suitable for administrator with relative privilegies, whicha re not always possible to obtain on remote servers. 
+ It's better use DB editor connected to concrete databse and run construction query once
+*/
 getConnection().query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '" + dbName + "'", function( error, rows) {
  
 
@@ -242,6 +254,7 @@ getConnection().query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE
 
      }//if Database does not exist
      else {
+     	//database exists, so USE it
      	getConnection().query("USE " + dbName);
      }
 	 
@@ -255,7 +268,11 @@ getConnection().query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE
  	throw error;
  }
        
-//Saves stop data in database
+/*
+    Saves start information of the client 
+    @method saveStartData
+    @param  {Object} startData  Object that contains all necessary fields for start registration 
+*/
 function saveStartData(startData) {
 
 
@@ -290,6 +307,14 @@ function saveStartData(startData) {
 };
 
 
+       
+/*
+    Saves log of start or stop of the client's app
+    @method insertLog
+    @param  {Object}     startData  Object that contains all necessary fields for start registration 
+    @param  {bool}       opened  True if save start state of app, False otherwise
+    @param  {Function}   error   Callback fro handling raised errors
+*/
 function insertLog(startData, opened, error) {
 	
 	/*var startData = {             
@@ -340,6 +365,11 @@ function insertLog(startData, opened, error) {
 }
 
 
+/*
+    Saves user license information
+    @method saveLicense
+    @param  {Object}     startData  Object that contains all necessary fields for start registration   
+*/
 function saveLicense(startData) {
 
 
@@ -378,6 +408,15 @@ function saveLicense(startData) {
 
 }
 
+
+
+/*
+    Saves user hardware information, if it's not already present
+    @method hardwareTableCheck
+    @param  {Object}         startData  Object that contains all necessary fields for start registration   
+    @param  {Function}       next   Callback for calling next function in chain
+    @param  {Function}       error  Callback for calling error function in chain
+*/
 function hardwareTableCheck(startData, next, error) {
 
 
@@ -394,16 +433,7 @@ function hardwareTableCheck(startData, next, error) {
          hour           :  split[9], //execution hour
     };*/
 
-	/*CREATE TABLE Hardware (	
-		HardwareID VARCHAR(20),
-    	AppVersion VARCHAR(16),
-    	OS         VARCHAR(20),
-   	 	Processor  VARCHAR(20),
-    	Country    VARCHAR(20),  
-		RegistrationDate VARCHAR(8), 
-		RegistrationHour VARCHAR(5),
-		PRIMARY KEY ( HardwareID )						
-	);*/
+
 
  	var hardwareIDEscaped =  getConnection().escape(startData.hardwareID); 
  	var appVersionEscaped =  getConnection().escape(startData.appVersion); 
@@ -468,6 +498,13 @@ function hardwareTableCheck(startData, next, error) {
 }
 
 
+/*
+    Saves user  information, if it's not already present
+    @method clientsTableCheck
+    @param  {Object}         startData  Object that contains all necessary fields for start registration   
+    @param  {Function}       next   Callback for calling next function in chain
+    @param  {Function}       error  Callback for calling error function in chain
+*/
 function clientsTableCheck(startData, next, error) {
 
 	/*var startData = {             
@@ -484,16 +521,6 @@ function clientsTableCheck(startData, next, error) {
     };*/
 
 
-
-	/*
-		CREATE TABLE Clients (
-		ClientID SMALLINT(6),
-		HardwareID VARCHAR(20),
-		RegistrationDate VARCHAR(8), 
-		RegistrationHour VARCHAR(5),
-		PRIMARY KEY ( ClientID )							
-		);
-	*/
 
 	var hardwareIDEscaped =  getConnection().escape(startData.hardwareID); 
 	var clientIDEscaped =  getConnection().escape(startData.clientCode); 
@@ -545,13 +572,24 @@ function clientsTableCheck(startData, next, error) {
 	});
 }
 
+
+/*
+    Saves stop information
+    @method saveStopData
+    @param  {Object}         stopData  Object that contains all necessary fields for stop registration     
+*/
 function saveStopData (stopData) {
 
-	insertLog(stopData, 0, handleerror);
-	
+	insertLog(stopData, 0, handleerror);	
 };
 
 
+
+/*
+    Saves error information
+    @method saveErrorData
+    @param  {Object}         errorData  Object that contains all necessary fields for error definition     
+*/
 function  saveErrorData(errorData) {
 
 
@@ -639,6 +677,13 @@ function  saveErrorData(errorData) {
 
 }
 
+
+
+/*
+    Saves action information
+    @method saveActionData
+    @param  {Object}         actionData  Object that contains all necessary fields for action definition     
+*/
 function saveActionData (actionData) {
 	
 	 /*
@@ -654,14 +699,6 @@ function saveActionData (actionData) {
          hour            : split[8]  //execution hour
      }; */
 
-	/*CREATE TABLE LogAction (
-	ClientID SMALLINT(6),
-	HardwareID VARCHAR(20),	
-	Action VARCHAR(20),	
-	ActionValue VARCHAR(30),	
-	RegistrationDate VARCHAR(8), 
-	RegistrationHour VARCHAR(5),
-	PRIMARY KEY ( ClientID ));*/
 
  	var hardwareIDEscaped 		= getConnection().escape(actionData.hardwareID); 
  	var clientIDEscaped 		= getConnection().escape(actionData.clientCode);  
@@ -746,14 +783,20 @@ function saveActionData (actionData) {
 
 
 
-/* var params ={
-      startDate : startDate, //start date 
-      endDate   : endDate,   //end date 
-      done : done,           //done callback 
-      err: err               //error callback
- };*/
 
+/*
+    Get app destribution grouped by version
+    @method getAppVersionsDistribution
+    @param  {Object}         params  Object that contains query data      
+*/
 function getAppVersionsDistribution(params) {
+
+	/* var params ={
+	      startDate : startDate, //start date 
+	      endDate   : endDate,   //end date 
+	      done : done,           //done callback 
+	      err: err               //error callback
+	 };*/
 
     var start = getConnection().escape(params.startDate); 
     var end   =  getConnection().escape(params.endDate); 
@@ -783,15 +826,20 @@ function getAppVersionsDistribution(params) {
 }
 
 
-/* var params ={
+/*
+    Get app use time average per day
+    @method getAvgUseTimePerDay
+    @param  {Object}         params  Object that contains query data      
+*/
+function getAvgUseTimePerDay(params) {
+
+	/* var params ={
       startDate : startDate, //start date 
       endDate   : endDate,   //end date 
        clientID  : clientID,  //CAN be present, but optional. In case there is, slice on clientID too.
       done : done,           //done callback 
       err: err               //error callback
- };*/
-function getAvgUseTimePerDay(params) {
-
+ 	};*/
 	var start =  getConnection().escape(params.startDate); 
     var end   =  getConnection().escape(params.endDate); 
 
@@ -831,14 +879,23 @@ function getAvgUseTimePerDay(params) {
 }
 
 
-/* var params ={
+
+/*
+    Get destribution of errors in specified period of time
+    @method getErrorsDistributionInPeriod
+    @param  {Object}         params  Object that contains query data      
+*/
+function getErrorsDistributionInPeriod(params) {
+
+
+	/* var params ={
       startDate : startDate, //start date 
       endDate   : endDate,   //end date 
       clientID  : clientID,  //CAN be present, but optional. In case there is, slice on clientID too.
       done : done,           //done callback 
       err: err               //error callback
- };*/
-function getErrorsDistributionInPeriod(params) {
+    };*/
+
 	var start = getConnection().escape(params.startDate); 
     var end   =  getConnection().escape(params.endDate); 
 
@@ -878,13 +935,21 @@ function getErrorsDistributionInPeriod(params) {
     });
 }
 
-/* var params ={
-      startDate : startDate, //start date 
-      endDate   : endDate,   //end date       
-      done : done,           //done callback 
-      err: err               //error callback
- };*/
+
+/*
+    Get destribution of errors in specified period of time grouped by type of the error
+    @method getErrorDistributionInPeriodByType
+    @param  {Object}         params  Object that contains query data      
+*/
 function  getErrorDistributionInPeriodByType(params) {
+
+
+	/* var params ={
+	      startDate : startDate, //start date 
+	      endDate   : endDate,   //end date       
+	      done : done,           //done callback 
+	      err: err               //error callback
+	 };*/
 
 	var start = getConnection().escape(params.startDate); 
     var end   =  getConnection().escape(params.endDate); 
@@ -917,13 +982,20 @@ function  getErrorDistributionInPeriodByType(params) {
 }
 
 
-/* var params ={
-      startDate : startDate, //start date 
-      endDate   : endDate,   //end date       
-      done : done,           //done callback 
-      err: err               //error callback
- };*/
+
+/*
+    Get log of error data in specified period
+    @method getErrorLogInPeriod
+    @param  {Object}         params  Object that contains query data      
+*/
 function  getErrorLogInPeriod(params) {
+
+	/* var params ={
+	      startDate : startDate, //start date 
+	      endDate   : endDate,   //end date       
+	      done : done,           //done callback 
+	      err: err               //error callback
+	 };*/
 
 	var start = getConnection().escape(params.startDate); 
     var end   =  getConnection().escape(params.endDate); 
@@ -956,15 +1028,21 @@ function  getErrorLogInPeriod(params) {
 
 
 
-/* var params ={
-      startDate : startDate, //start date 
-      endDate   : endDate,   //end date 
-      clientID  : clientID,  //CAN be present, but optional. In case there is, slice on clientID too.
-      done : done,           //done callback       
-      err: err               //error callback
- };*/
+/*
+    Get orders grouped bt concrete types 
+    @method getOrdersStat
+    @param  {Object}         params  Object that contains query data      
+*/
 function getOrdersStat(params) {
 
+
+	/* var params ={
+	      startDate : startDate, //start date 
+	      endDate   : endDate,   //end date 
+	      clientID  : clientID,  //CAN be present, but optional. In case there is, slice on clientID too.
+	      done : done,           //done callback       
+	      err: err               //error callback
+	 };*/
 	var client = " ";
     if(params.clientID) {
     	client = params.clientID;
@@ -1011,15 +1089,22 @@ function getOrdersStat(params) {
 }
 
 
-/* var params ={
-      startDate : startDate, //start date 
-      endDate   : endDate,   //end date 
-      clientID  :  id,	      //client ID
-      done : done,           //done callback 
-      err: err               //error callback
- };*/
+
+/*
+    Get information about specified user defined by ClientID
+    @method getUserInfo
+    @param  {Object}         params  Object that contains query data      
+*/
 function getUserInfo(params) {
 
+
+	/* var params ={
+	      startDate : startDate, //start date 
+	      endDate   : endDate,   //end date 
+	      clientID  :  id,	      //client ID
+	      done : done,           //done callback 
+	      err: err               //error callback
+	 };*/
 	var start 	 =  getConnection().escape(params.startDate); 
     var end   	 =  getConnection().escape(params.endDate); 
     var client   =  getConnection().escape(params.clientID); 
@@ -1055,14 +1140,21 @@ function getUserInfo(params) {
 }
 
 
-/* var params ={
-      startDate : startDate, //start date 
-      endDate   : endDate,   //end date     
-      client    : clientID, 
-      done : done,           //done callback       
-      err: err               //error callback
- };*/
+/*
+    Get overall information run on system
+    @method getHardwareOverallInfo
+    @param  {Object}         params  Object that contains query data      
+*/
 function getHardwareOverallInfo(params) {
+
+
+	/* var params ={
+	      startDate : startDate, //start date 
+	      endDate   : endDate,   //end date     
+	      client    : clientID, 
+	      done : done,           //done callback       
+	      err: err               //error callback
+	 };*/
 
 	var start 	 =  getConnection().escape(params.startDate); 
     var end   	 =  getConnection().escape(params.endDate);    
@@ -1096,15 +1188,23 @@ function getHardwareOverallInfo(params) {
 
 
 
-/* var params ={
-      startDate : startDate, //start date 
-      endDate   : endDate,   //end date     
-      client    : clientID, 
-      maxID     : maxID, 	  //return only IDs bigger then specified, or -1 for all
-      done : done,           //done callback       
-      err: err               //error callback
- };*/
+/*
+    Get action log data
+    @method getActionsLog
+    @param  {Object}         params  Object that contains query data      
+*/
 function  getActionsLog(params) {
+
+
+	/* var params ={
+	      startDate : startDate, //start date 
+	      endDate   : endDate,   //end date     
+	      client    : clientID, 
+	      maxID     : maxID, 	  //return only IDs bigger then specified, or -1 for all
+	      done : done,           //done callback       
+	      err: err               //error callback
+	 };*/
+
 	var client = " ";
 	var rowLimit = 100;
 	var aggregator = " WHERE ";
@@ -1179,7 +1279,7 @@ function  getActionsLog(params) {
 }
 
 
-
+/*exports*/
 exports.saveStartData    					= saveStartData;
 exports.saveStopData     					= saveStopData;
 exports.saveActionData   					= saveActionData;

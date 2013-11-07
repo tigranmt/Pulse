@@ -1,3 +1,5 @@
+ /**NOT USED FOR NOW */
+
  var start = require("../server");
  var redis = require("redis");
  var client = redis.createClient();
