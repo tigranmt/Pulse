@@ -1,9 +1,16 @@
+/*Reposnsible for processing requests from the clients. PUSH requests*/
+
 //var db = require("./database_redis"); 
 var db = require("../database/database_mysql"); 
 
 var splitChar = "#";
 
 
+/* 
+   Checks if specified request can be processed, based on security informaiton provided with it. For no ALWAYS PASS
+   @method canPass
+   @param  {Object} packet Packet containing authentication information to validate
+*/
 function canPass(packet) {
 
     /*CHANGE THIS LINE TO CHECK FOR APPLICATION SPECIFIC KEY */
@@ -14,13 +21,16 @@ function canPass(packet) {
     /***************************************************/
     /***************************************************/
 
-
-
-
     return false;
 }
 
 
+
+/*
+   Processes start data registraion request
+   @method processStartData
+   @param  {String} startString String that will be splitted based on predefinded delimter and packet will be constructed to save in DB 
+*/
 function processStartData(startString) {    
 
     
@@ -30,6 +40,7 @@ function processStartData(startString) {
     console.log("START DATA packet VERSION: " + version);
 
 
+    //packet can conatin different version, which usually leads to structual changes
     var packet = { }; 
     if(version === "1") {
         packet = {
@@ -64,7 +75,7 @@ function processStartData(startString) {
 
 
 
-
+    //check if call can be processed actually 
     if(!canPass(packet)) {
         
         throw "Non valid app key";
@@ -72,10 +83,16 @@ function processStartData(startString) {
 
     }
     
+    //save in DB 
     db.saveStartData(packet);
 };
 
 
+/*
+   Processes stop  data registraion request
+   @method processStopData
+   @param  {String} stopString String that will be splitted based on predefinded delimter and packet will be constructed to save in DB
+*/
 function processStopData(stopString) {    
 
     var split   = stopString.split(splitChar);
@@ -97,6 +114,11 @@ function processStopData(stopString) {
 };
 
 
+/*
+   Processes action  data registraion request
+   @method processActionData
+   @param  {String} actionString String that will be splitted based on predefinded delimter and packet will be constructed to save in DB
+*/
 function processActionData(actionString) {
     var split   = actionString.split(splitChar);
        var packet = {             
@@ -121,7 +143,11 @@ function processActionData(actionString) {
 };
 
 
-
+/*
+   Processes error  data registraion request
+   @method processErrorData
+   @param  {String} actionString String that will be splitted based on predefinded delimter and packet will be constructed to save in DB
+*/
 function processErrorData(actionString) {
     var split   = actionString.split(splitChar);
        var packet = {             
@@ -146,6 +172,11 @@ function processErrorData(actionString) {
 
 
 
+/*
+   Processes license  data registraion request
+   @method processLicenseData
+   @param  {String} licenseData String that will be splitted based on predefinded delimter and packet will be constructed to save in DB
+*/
 function processLicenseData(licenseData) {
         var split   = licenseData.split(splitChar);
         var licenseData = {             

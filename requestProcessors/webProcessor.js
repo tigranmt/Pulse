@@ -1,3 +1,7 @@
+/*
+  Manages processing of the of web requestes fro VISUALIZATION of the stat data
+*/
+
 
 var fs   = require("fs"); 
 var path = require('path');
@@ -43,10 +47,18 @@ function actions(req, res) {
 }
 
 
-function processResources(res, res, filename, mimeType) {
+/*
+  Processes request for resource loading 
+  @method  processResources
+  @param   {Object}  req   Request object 
+  @param   {Object}  res   Response object 
+  @param   {String} filename   Resource name to laod
+  @param   {String} mimeType   MimeType of resource
+*/
+function processResources(req, res, filename, mimeType) {
 
- 	var localPath = __dirname;
-	//move to upper level (..) and got to the requested file
+ 	  var localPath = __dirname;
+	  //move to upper level (..) and got to the requested file
 
     localPath = path.join(localPath, "..", filename);  
 
@@ -79,8 +91,9 @@ function processResources(res, res, filename, mimeType) {
 
 }
 
-function process(req, res) {
 
+
+function process(req, res) {
 
 
     var validExtensions = {
@@ -115,7 +128,11 @@ function process(req, res) {
 }
 
 
-
+/*
+  Converts provided date in unviersal formated date, suitable for saving in DB field. So it does not depend on the actual culture of DB server
+  @method toDbFormattedDate
+  @param  {String} date The date that has to be converted from DD-MM-YYYY to YYYY/MM/DD
+*/
 function toDbFormattedDate(date) {
   
   if(!date)
