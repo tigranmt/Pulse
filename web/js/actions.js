@@ -41,7 +41,7 @@
 		queryID    = clID;
 
 		//construct request data
-		var requestData = {
+		var queryData = {
 			startDate : queryStart, 
 			endDate : queryEnd,
 			clientID : queryID, 
@@ -49,14 +49,8 @@
 		}
 
 	
-		var actionLog = $.ajax({
-			type: "GET",
-			url: window.location.href + "/getActionsLog",	
-			data : requestData
-		}); 
 
-
-		actionLog.done(function(jsonData) {
+		var done = function(jsonData) {
 			var length = jsonData.length; 
 			var collector = []; 
 			for(var i=0; i < length; i++) 
@@ -113,15 +107,15 @@
 
 			data.actionsList .splice(99);
 
-		}); 
+		}; 
 
 
-		actionLog.fail(function(err) {
+		var fail = function(err) {
 			console.log(err);
-		});
+		};
 
 		
-
+		RemoteQueryService.get("/getActionsLog", queryData, done, fail);
 
 	}
 

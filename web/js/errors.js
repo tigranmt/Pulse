@@ -15,6 +15,7 @@
 	$(".startDate").val(startDate);
 	$(".endDate").val(endDate);
 
+
 	var formatDate = function(date) {
 		//registration date AND PC
 		var splits = date.split("/"); 
@@ -55,21 +56,26 @@
 	}
 
 
-	var  getErrorDistributionInPeriodByType = function() {
+	var updateUI = function() 
+	{
+		var s = $(".startDate").val(); 
+		var e = 	$(".endDate").val(); 	
+		var queryData = {startDate : s, endDate:e};
+
+		getErrorDistributionInPeriodByType(queryData);
+		loadErrorLog(queryData);
+
+	}
+
+	/*
+		Gets and construct/aggergates errpor data 
+		@method getErrorDistributionInPeriodByType
+	*/
+	var  getErrorDistributionInPeriodByType = function(queryData) {
 		
-		var start = $(".startDate").val(); 
-		var end = 	$(".endDate").val(); 		
-
-		var queryData = {startDate : start, endDate:end};
-		var errorsDist = $.ajax({
-			type: "GET", 
-			url: window.location.href + "/getErrorDistributionInPeriodByType",	
-			data : queryData
-
-		});
-
-
-		errorsDist.done(function(jsonData) {
+	
+	
+		var done = function(jsonData) {
 			
 			//get over all data about errors, which will be used in different places after
 			errorsData = jsonData;
@@ -166,16 +172,19 @@
 			chartBinder.bindDataToChart("donut", "errorsVersionPie", errorsData.pieChartData)
 			// -----------------------
 
-		}); 
+		}; 
 
-		errorsDist.fail(function(err) {
+		var fail = function(err) {
 			console.log(err);
-		});
+		};
+
+
+		RemoteQueryService.get("/getErrorDistributionInPeriodByType", queryData, done, fail);
 
 	}
 
 
-	var loadErrorLog = function() {		
+	var loadErrorLog = function(queryData) {		
 
 		var domNode =  $("#errorsLog")[0];
 		if(!errorLogModel.errors) {
@@ -183,44 +192,9 @@
 			ko.applyBindings(errorLogModel,domNode);
 		}
 
-		errorLogModel.errors.removeAll(); 
+		errorLogModel.errors.removeAll(); 	
 
-
-		//query for data 
-		var start = $(".startDate").val(); 
-		var end = 	$(".endDate").val(); 
-
-		var queryData = {startDate : start, endDate:end};
-		var errLog = $.ajax({
-			type: "GET", 
-			url: window.location.href + "/getErrorLogInPeriod",	
-			data : queryData
-		});
-		// -----------------------
-
-		var errorDetailPopover = undefined; 
-
-		//define mouse event handlers 
-		errorLogModel.showDetails = function(errorData, event) {
-			
-			if(errorDetailPopover) {
-				errorDetailPopover.popover('hide');
-			}
-
-			var title = "Error on: " + errorData.RegistrationDate + " " + errorData.RegistrationHour + "  Client: " + errorData.ClientID;
-
-			showModal(title , errorData.ErrorValue);
-			
-		}
-
-		errorLogModel.hideDetails = function(errorData,event) {
-			if(errorDetailPopover) {
-				errorDetailPopover.popover('hide');
-			}
-		}
-		// ----------------------
-
-		errLog.done(function(jsonData) {
+		var done = function(jsonData) {
 			
 			
 			var length = jsonData.length; 
@@ -248,21 +222,18 @@
 			if(errorLogModel.errors().length === 0) {
 
 				errorLogModel.errors.push({ErrorTitle: "-", RegistrationDate: "-/-/", RegistrationHour: "-/-/", AppVersion: "-.-.-.-", ClientID: "-", showDetails : errorLogModel.showDetails, hideDetails : errorLogModel.hideDetails });
-			}
+			}			
 
-			
+		}; 
 
-		}); 
-
-		errLog.fail(function(err) {
+		var fail = function(err) {
 			console.log(err);
-		});
+		};
+
+
+		RemoteQueryService.get("/getErrorLogInPeriod", queryData, done, fail);
 		
 	}
-
-	getErrorDistributionInPeriodByType();
-	loadErrorLog();
-
 
 
 
@@ -293,13 +264,13 @@
 
 
 	$("#updateQuery").bind("click", function() {
-
-		getErrorDistributionInPeriodByType();
-		loadErrorLog();
+		updateUI();
 	});
 
 
 
+
+	updateUI();
 
 
 })();

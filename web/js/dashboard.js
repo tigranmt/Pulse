@@ -23,25 +23,15 @@
 
 	// ------------------------------------------------------------------------------
 
-
-	var setData = function() {
-			//query for version destribution 
-
-		var start = $(".startDate").val(); 
-		var end = 	$(".endDate").val(); 
-
-		$("#versionsSharePie").empty();	        	
-	    $("#hoursPerDayBar").empty();
-
-		var dateRange = {startDate : start, endDate:end};
-
-		var appDistribution = $.ajax({
-			type: "GET",
-			url: window.location.href + "/getAppVersionsDistribution",	
-			data : dateRange
-		}); 
-
-		appDistribution.done(function(jsonData) {
+    
+    /*
+      Gets distribution of app grouped by version 
+      @method getAppDistribution
+    */
+	var getAppDistribution = function(date) {
+	   
+	    //Ajax  done
+	    var done = function(jsonData) {
 			console.log(jsonData);
 
 	        appVersionShareData = [];
@@ -61,23 +51,24 @@
 
 			chartBinder.bindDataToChart("donut", "versionsSharePie", appVersionShareData);
 			
-		});
+		};
 
-		appDistribution.fail(function(err) {
+		//Ajax failed
+		var fail = function(err) {
 			console.log(err);
-		});
-		// -------------
+		};
 
 
-		//query for use time per day 
-		var usedTimePerDay = $.ajax( {
-			type: "GET", 
-			url: window.location.href + "/getAvgUseTimePerDay",	
-			data : dateRange
+		RemoteQueryService.get("/getAppVersionsDistribution", date, done, fail);
+	}
 
-		});
+    /*
+     Get app used average time per day 
+     @method getUsedTimerPerDay
+    */
+	var getUsedTimerPerDay = function(date) {	
 
-		usedTimePerDay.done(function(jsonData) {
+		var done = function(jsonData) {
 
 			appHoursPerDay = []; 
 			var length = jsonData.length;
@@ -90,23 +81,23 @@
 			}
 
 			chartBinder.bindDataToChart("bar", "hoursPerDayBar", appHoursPerDay)
-		});
+		};
 
-		usedTimePerDay.fail(function(err) {
+		var fail = function(err) {
 			console.log(err);
-		});
-		//--------------------------------------
+		};
+
+		RemoteQueryService.get("/getAvgUseTimePerDay", date, done, fail);
+	}
 
 
-		//query errors per type in period 
-		var errorsDistr = $.ajax( {
-			type: "GET", 
-			url: window.location.href + "/getErrorsDistributionInPeriod",	
-			data : dateRange
+	/*
+		Get errors distribution in specified period. Grouped by error title
+		@method getErrorsDistribution
+	*/
+	var getErrorsDistribution = function(date) {		
 
-		});
-
-		errorsDistr.done(function(jsonData) {
+		var done = function(jsonData) {
 
 			errorsDistribution = []; 
 			var length = jsonData.length;
@@ -125,23 +116,23 @@
 	        }
 
 			chartBinder.bindDataToChart("donut", "errorsPieChart", errorsDistribution)
-		});
+		};
 
-		errorsDistr.fail(function(err) {
+		var fail = function(err) {
 			console.log(err);
-		});
-		// ----- 
+		};
+
+		RemoteQueryService.get("/getErrorsDistributionInPeriod", date, done, fail);
+	}
 
 
-		//query orders stat pie
-		var oStat = $.ajax( {
-			type: "GET", 
-			url: window.location.href + "/getOrdersStat",	
-			data : dateRange
-
-		});
-
-		oStat.done(function(jsonData) {
+    /*
+		Get stats on orders made inspecified period, grouped by the certain order types
+		@method getOrdersStat
+    */
+	var getOrdersStat = function(date) {
+		
+		var done = function(jsonData) {
 
 			ordersStat = []; 
 			var length = jsonData.length;
@@ -160,23 +151,25 @@
 	        }
 
 			chartBinder.bindDataToChart("donut", "ordersStatPieChart", ordersStat)
-		});
+		};
 
-		oStat.fail(function(err) {
+		var fail = function(err) {
 			console.log(err);
-		});
-		// ----- 
+		};
+
+		RemoteQueryService.get("/getOrdersStat", date, done, fail);
+	}
 
 
+	/*
+		Gets information about OS, Processors, Language distribution and Hardware history
+		@method getHardwareInfo
+	*/
+	var getHardwareInfo = function(date) {
 		//query OS distribution
-		var hardwareInfo = $.ajax( {
-			type: "GET", 
-			url: window.location.href + "/getHardwareOverallInfo",	
-			data : dateRange
+	
 
-		});
-
-		hardwareInfo.done(function(jsonData) {
+		var done = function(jsonData) {
 
 		
 			var length = jsonData.length;
@@ -268,15 +261,47 @@
 			chartBinder.bindDataToChart("donut", "processorsPieChart", hardwareOverallInfo.procDistr);
 			chartBinder.bindDataToChart("donut", "osLanguagesPieChart", hardwareOverallInfo.countriesDistr);
 			chartBinder.bindDataToChart("donut", "archPieChart", hardwareOverallInfo.archDistr);
-		});
+		};
 
-		hardwareInfo.fail(function(err) {
+		var fail = function(err) {
 			console.log(err);
-		});
+		};		
+
+
+		RemoteQueryService.get("/getHardwareOverallInfo", date, done, fail);
+
+	}
+
+	var setData = function() {
+			//query for version destribution 
+
+		var start = $(".startDate").val(); 
+		var end = 	$(".endDate").val(); 
+
+		$("#versionsSharePie").empty();	        	
+	    $("#hoursPerDayBar").empty();
+
+		var dateRange = {startDate : start, endDate:end};
+	
+		//query app distribution
+		getAppDistribution(dateRange);
+		// -------------
+
+		//query for use time per day 
+		getUsedTimerPerDay(dateRange);
+		//--------------------------------------
+
+		//query errors per type in period 
+		getErrorsDistribution(dateRange);
 		// ----- 
 
+		//query orders stat pie
+		getOrdersStat(dateRange);
+		// ----- 
 
-		
+        //get hardware vary informaiton 
+        getHardwareInfo(dateRange);
+        //----		
 		
 	}
 	

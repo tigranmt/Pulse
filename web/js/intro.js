@@ -1,3 +1,4 @@
+
 (function() {
 
 	$("#goto").on("click", function() {

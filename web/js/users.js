@@ -81,15 +81,13 @@
 	}
 	
 
+    /*
+		Gets generic information about user (Like alst hardware used, first registration in the system..)
+		@method getUserGenericInfo
+    */
     var getUserGenericInfo = function(queryData) {
-    	var uInf = $.ajax( {
-			type: "GET", 
-			url: window.location.href + "/getUserInfo",	
-			data : queryData
-
-		});
-
-		uInf.done(function(jsonData) {
+    	
+		var done = function(jsonData) {
 
 			userData = jsonData; 
 			userGenericInfo = {};
@@ -133,23 +131,24 @@
 			setHardwareHistory(userData); 
 		
 
-		});
+		};
 
-		uInf.fail(function(err) {
+		var fail = function(err) {
 			console.log(err);
-		});
+		};
+
+		RemoteQueryService.get("/getUserInfo", queryData, done, fail);
     }
 
 
+    /*
+		Gets orders grouped by certain types for specified user
+		@method getOrderStatByUser
+    */
     var getOrderStatByUser = function(queryData) {		
 
-        var oStat = $.ajax({
-			type: "GET", 
-			url: window.location.href + "/getOrderStatByUser",	
-			data : queryData
-		});
 
-		oStat.done(function(jsonData) {
+		var done = function(jsonData) {
 
 			ordersStat = []; 
 			var totOrders = 0; 
@@ -167,24 +166,24 @@
 	        	return "Total Orders count: " + this.totOrders;
 	        }
 			chartBinder.bindDataToChart("donut", "ordersStatByUser", ordersStat)
-		});
+		};
 
-		oStat.fail(function(err) {
+		var fail = function(err) {
 			console.log(err);
-		});
+		};
+
+		RemoteQueryService.get("/getOrderStatByUser", queryData, done, fail);
     }
 
 
+    /*
+    	Get errors distribution grouped by error title for specified user
+    	@method  getErrorsDistributionInPeriodByUser
+    */
     var getErrorsDistributionInPeriodByUser = function(queryData) {
 
-    	var errorsDistr = $.ajax( {
-			type: "GET", 
-			url: window.location.href + "/getErrorsDistributionInPeriodByUser",	
-			data : queryData
-
-		});
-
-		errorsDistr.done(function(jsonData) {
+    
+		var done = function(jsonData) {
 
 			errorsDistribution = []; 
 			var totErrCount = 0; 
@@ -203,24 +202,24 @@
 			}
 
 			chartBinder.bindDataToChart("donut", "errorStatByUser", errorsDistribution)
-		});
+		};
 
-		errorsDistr.fail(function(err) {
+		var fail = function(err) {
 			console.log(err);
-		});
+		};
+
+		RemoteQueryService.get("/getErrorsDistributionInPeriodByUser", queryData, done, fail);
     }
 
 
+    /*
+		Get app abverage used time for spcified user
+		@method getAvgTimePerUser
+    */
     var getAvgTimePerUser = function(queryData) {
     	//query for use time per day 
-		var usedTimePerDay = $.ajax( {
-			type: "GET", 
-			url: window.location.href + "/getAvgUseTimePerDayByUser",	
-			data : queryData
-
-		});
-
-		usedTimePerDay.done(function(jsonData) {
+	
+		var done = function(jsonData) {
 
 			appHoursPerDay = []; 
 			var length = jsonData.length;
@@ -233,11 +232,13 @@
 			}
 
 			chartBinder.bindDataToChart("bar", "hoursPerDayBar", appHoursPerDay)
-		});
+		};
 
-		usedTimePerDay.fail(function(err) {
+		var fail = function(err) {
 			console.log(err);
-		});
+		};
+
+		RemoteQueryService.get("/getAvgUseTimePerDayByUser", queryData, done, fail);
 		//--------------------------------------
     }
 
@@ -252,6 +253,9 @@
     }
 
 
+    /*
+		Computes and aggergates hardware history for specified user
+    */
     var setHardwareHistory = function(userHardwareData) {
 
 		hardwareHistory = {};
