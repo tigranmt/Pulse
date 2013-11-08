@@ -92,7 +92,13 @@ function processResources(req, res, filename, mimeType) {
 }
 
 
+/*
+  Checks if specified request can be processed according to the reource type requested.
+  @method process
+  @param {Object} req Request object 
+  @param {Object} res Response object
 
+*/
 function process(req, res) {
 
 

@@ -1,3 +1,6 @@
+/*
+* RESPONSIBLE FOR ERRORS DATA
+*/
 (function() {
 
 	var curDate = new Date();	

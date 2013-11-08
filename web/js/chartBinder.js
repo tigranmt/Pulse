@@ -1,3 +1,6 @@
+/*
+* REPOSNSIBLE FOR BINDING DATA TO CHART
+*/
 var chartBinder = {
 	
 	bindDataToChart : function(chartType, elemementName, data, params) {

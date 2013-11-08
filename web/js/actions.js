@@ -1,3 +1,7 @@
+/*
+* RESPONSIBLE FOR MANAGING ACTIONS PAGE
+*/
+
 (function() {
 
 	var data = undefined; 
@@ -13,6 +17,9 @@
 		oldRecord   : 2
 	}
 
+	/*
+		Sets data on UI 
+	*/
 	var setData = function(esplicitUpdateRequest) {
 
 		//get date range if any 
@@ -61,6 +68,7 @@
 				}
 
 
+				//construct binded value 
 				var bindValue = { 
 					ClientID : d.ClientID, 
 					RegistrationDate : d.RegistrationDate, 					             

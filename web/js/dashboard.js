@@ -1,3 +1,6 @@
+/*
+* RESPONSIBLE FOR DASHJBOARD DATA
+*/
 (function() {
 
 	//assign start and end date to the current and one week ago

@@ -1,3 +1,7 @@
+/*
+* RESPONSIBLE FOR VISULIZATION OF  SAMPLE DATA ON INTRO PAGE
+*/
+
 (function bootstrap() {
 
 	

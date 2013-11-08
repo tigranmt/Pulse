@@ -1,3 +1,6 @@
+/*
+* REPOSNSIBLE FOR USERS DATA
+*/
 (function() {
 
 	var curDate = new Date();	
