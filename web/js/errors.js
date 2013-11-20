@@ -16,44 +16,10 @@
 	$(".endDate").val(endDate);
 
 
-	var formatDate = function(date) {
-		//registration date AND PC
-		var splits = date.split("/"); 
-		return splits[2] + "-" + splits[1] + "-" + splits[0];
-	}
 
 
 
-	var showModal = function(title, message) {
-		title = title || ""; 
-		message = message || ""; 
 
-       	if(title === "" || message === "")
-       		return; 		
-
-		
-		if($('#errorDetails').length === 0) {
-
-			$(document.body).append("<div id='errorDetails' class='modal fade'> " + 
-	  					 "<div class='modal-dialog'>" + 
-	    					"<div class='modal-content'>" + 
-	      						"<div class='modal-header'>" + 
-	        						"<button type='button' class='btn btn-success pull-right' data-dismiss='modal'>Close</button>"+
-	        						"<h4 class='modal-title'>" + title + "</h4>" + 
-	      						"</div>" + 
-	      						"<div class='modal-body' style='overflow: scroll;'>" + 
-	        						"<p>" + message + "</p>" + 
-	      						"</div>" +       						
-	    					"</div>"+
-	 					 "</div>" + 
-						"</div>");
-
-		}
-
-
-		$('#errorDetails').modal('show');
-			
-	}
 
 
 	var updateUI = function() 
@@ -88,7 +54,7 @@
 
 			for(var i=0; i< length; i++) {
 				var d = errorsData[i]; 
-				var dateString = formatDate(d.RegistrationDate); 
+				var dateString = Utils.formatDate(d.RegistrationDate); 
 				if(!collectorByDate[dateString])
 					collectorByDate[dateString] = 0; 
 				collectorByDate[dateString] += d.Count;
@@ -140,7 +106,7 @@
 				{
 					var d = errorsData[i]; 
 					//accept only data of the picked data report
-					var dateString = formatDate(d.RegistrationDate); 
+					var dateString = Utils.formatDate(d.RegistrationDate); 
 					if(dateString !== data.date)
 						continue; 
 
@@ -194,6 +160,18 @@
 
 		errorLogModel.errors.removeAll(); 	
 
+
+
+		errorLogModel.showDetails = function(errorData, event) {
+		
+			var title = "Error on: " + errorData.RegistrationDate + " " + errorData.RegistrationHour + "  Client: " + errorData.ClientID;
+			Utils.showModal(title , errorData.ErrorValue);			
+		};
+
+		errorLogModel.hideDetails = function(errorData,event) {
+			
+		};
+
 		var done = function(jsonData) {
 			
 			
@@ -217,6 +195,7 @@
 			}
 
 			
+
 
 			//chec observable array length, if it's 0 push just a dummy object inside 
 			if(errorLogModel.errors().length === 0) {

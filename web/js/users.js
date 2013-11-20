@@ -87,6 +87,7 @@
     */
     var getUserGenericInfo = function(queryData) {
     	
+    
 		var done = function(jsonData) {
 
 			userData = jsonData; 
@@ -96,6 +97,12 @@
 			userGenericInfo.LastUsedOSVersion = "";
 
             var length = userData.length;
+
+            if(length === 0) {
+            	//no hardware information history available for givan date range
+            	//may suggset to the client to choose another range for better visualization 
+            }
+
 			for(var i=0; i< length; i++) {
 				var d = userData[i];			
 				if(compareAppVersion(d.AppVersion, userGenericInfo.MajorVersion)>0 )  {					
